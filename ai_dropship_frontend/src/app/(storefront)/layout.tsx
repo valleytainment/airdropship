@@ -1,0 +1,38 @@
+// src/app/(storefront)/layout.tsx
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "../globals.css"; // Adjust path if globals.css is elsewhere
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { cn } from "@/lib/utils"; // Assuming shadcn/ui utils
+import { CartProvider } from "@/lib/hooks/useCart"; // Import CartProvider
+// import { Toaster } from "@/components/ui/toaster"; // Import Toaster if using shadcn/ui toasts
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "AI Dropship Store",
+  description: "Discover amazing products curated by AI",
+};
+
+export default function StorefrontLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
+        <CartProvider> {/* Wrap content with CartProvider */}
+          <div className="relative flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+          {/* <Toaster /> */}
+        </CartProvider>
+      </body>
+    </html>
+  );
+}
+
