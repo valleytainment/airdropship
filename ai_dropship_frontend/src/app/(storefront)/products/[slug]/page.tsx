@@ -1,39 +1,62 @@
-// page.tsx  (no "use client" at the top)
+// src/app/(storefront)/products/[slug]/page.tsx
 
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import ClientProductPage from "./ClientProductPage";
-import { Product } from "@/types";
 import apiClient from "@/lib/apiClient";
+import type { Metadata } from "next";
+import type { Product } from "@/types";
 
-interface PageProps {
-  params: { slug: string };
+// 1️⃣ Pre-render all product slugs
+export async function generateStaticParams(): Promise<
+  { slug: string }[]
+> {
+  const { data: products } = await apiClient.get<Product[]>("/products");
+  return products.map((p) => ({ slug: p.id }));
 }
 
-// 1) Tell Next.js which slugs to export at build time
-export async function generateStaticParams() {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/products`
-  );
-  const products: { slug: string }[] = await res.json();
-  return products.map((p) => ({ slug: p.slug }));
+// 2️⃣ Generate per-page metadata asynchronously
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  return {
+    title: `Product ${slug}`,
+    description: `Details for product ${slug}`,
+  };
 }
 
-// 2) Server component: fetch the data
-export default async function ProductPage({ params }: PageProps) {
-  const product = await apiClient
-    .get<Product>(`/products/storefront/${params.slug}`)
-    .then((r) => r.data)
-    .catch((e) => {
-      if (e.response?.status === 404) return null;
-      throw e;
-    });
+// 3️⃣ Async page component handling Promise<params>
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
-  if (!product) return notFound();
+  let product: Product;
+  try {
+    const res = await apiClient.get<Product>(`/products/${slug}`);
+    product = res.data;
+  } catch {
+    return notFound();
+  }
 
-  // 3) Render your client UI
   return (
-    <div className="container mx-auto px-4 py-8">
-      <ClientProductPage product={product} />
+    <div className="container mx-auto px-6 py-8">
+      <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+      <Image
+        src={product.image_url}
+        alt={product.title}
+        width={600}
+        height={400}
+        className="rounded-lg object-cover"
+      />
+      <p className="mt-4 text-lg">{product.description}</p>
+      <p className="mt-2 text-xl font-semibold">
+        ${(product.price / 100).toFixed(2)}
+      </p>
     </div>
   );
 }

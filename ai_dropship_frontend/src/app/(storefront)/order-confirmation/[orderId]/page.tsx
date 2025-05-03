@@ -1,48 +1,75 @@
-// ai_dropship_frontend/src/app/(storefront)/order-confirmation/[orderId]/page.tsx
+// src/app/(storefront)/order-confirmation/[orderId]/page.tsx
 
-import { notFound } from 'next/navigation'
-import { Order } from '@/types'
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import apiClient from "@/lib/apiClient";
+import type { Metadata } from "next";
+import type { Order } from "@/types";
 
-interface PageProps {
-  params: { orderId: string }
+// 1️⃣ Provide the list of orderId params to pre-render
+export async function generateStaticParams(): Promise<
+  { orderId: string }[]
+> {
+  const { data: orders } = await apiClient.get<Order[]>("/orders");
+  return orders.map((order) => ({ orderId: order.id }));
 }
 
-// Pull in your API URL from env
-const baseUrl = process.env.NEXT_PUBLIC_API_URL
-
-// 1️⃣ Generate the list of pages to export
-export async function generateStaticParams() {
-  if (!baseUrl) return []  // no API URL → no pages
-
-  const res = await fetch(`${baseUrl}/orders`)
-  if (!res.ok) return []
-  const orders: { orderId: string }[] = await res.json()
-  return orders.map((o) => ({ orderId: o.orderId }))
+// 2️⃣ Generate per-page metadata (await params)
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orderId: string }>;
+}): Promise<Metadata> {
+  const { orderId } = await params;
+  return {
+    title: `Order ${orderId} Confirmation`,
+    description: `Details for order ${orderId}`,
+  };
 }
 
-export default async function OrderConfirmation({ params }: PageProps) {
-  const { orderId } = params
+// 3️⃣ Default export: async page component with Promise params
+export default async function OrderConfirmationPage({
+  params,
+}: {
+  params: Promise<{ orderId: string }>;
+}) {
+  const { orderId } = await params;
 
-  if (!baseUrl) {
-    // If API URL is missing in local dev, fallback to 404
-    return notFound()
+  let order: Order;
+  try {
+    const res = await apiClient.get<Order>(`/orders/${orderId}`);
+    order = res.data;
+  } catch {
+    return notFound();
   }
 
-  // 2️⃣ Fetch the order data
-  const res = await fetch(`${baseUrl}/orders/${orderId}`)
-  if (!res.ok) {
-    if (res.status === 404) return notFound()
-    throw new Error('Failed to load order')
-  }
-  const order: Order = await res.json()
-
-  // 3️⃣ Render the confirmation UI
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Thank you for your order!</h1>
-      <p>Your order number is <strong>{order.id}</strong>.</p>
-      <p>Total: <strong>${order.total.toFixed(2)}</strong></p>
-      {/* Add more details here as needed */}
+      <h1 className="text-3xl font-bold mb-4">
+        Thank You for Your Purchase!
+      </h1>
+      <p className="mb-2">
+        <strong>Order #:</strong> {orderId}
+      </p>
+      <p className="mb-6">
+        A confirmation email has been sent to <strong>{order.email}</strong>.
+      </p>
+
+      <h2 className="text-2xl font-semibold mb-2">Order Details</h2>
+      <ul className="list-disc pl-5 space-y-1">
+        {order.items.map((item) => (
+          <li key={item.id}>
+            {item.name} × {item.quantity} — $
+            {((item.price * item.quantity) / 100).toFixed(2)}
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-8">
+        <Link href="/products" className="text-blue-600 hover:underline">
+          Continue Shopping
+        </Link>
+      </div>
     </div>
-  )
+  );
 }
