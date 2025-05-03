@@ -1,0 +1,19 @@
+[build]
+  # Base directory: repository root
+  # Build command: run pnpm build from the root
+  command = "pnpm run build"
+  # Publish directory: the output directory of the frontend static export
+  publish = "ai_dropship_frontend/out"
+
+[build.environment]
+  # Specify the pnpm version Netlify should use
+  PNPM_VERSION = "8"
+  # Set NODE_VERSION if needed, Netlify often defaults to a reasonable LTS
+  # NODE_VERSION = "18"
+
+# Optional: Redirects for single-page applications if needed
+# [[redirects]]
+#  from = "/*"
+#  to = "/index.html"
+#  status = 200
+
