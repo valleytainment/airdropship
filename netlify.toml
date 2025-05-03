@@ -1,9 +1,9 @@
 [build]
-  # Base directory: repository root
+  # Base directory: repository root (or as set in Netlify UI)
   # Build command: run pnpm build from the root
   command = "pnpm run build"
-  # Publish directory: the output directory of the frontend static export
-  publish = "ai_dropship_frontend/out"
+  # Publish directory: relative to the base directory
+  publish = "out"
 
 [build.environment]
   # Specify the pnpm version Netlify should use
