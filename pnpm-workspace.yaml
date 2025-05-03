@@ -1,3 +1,3 @@
 packages:
-  - 'ai_dropship_frontend'
-  - 'ai_dropship_backend'
+  - "ai_dropship_frontend"
+  - "worker"

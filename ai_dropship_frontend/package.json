@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "next export",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postbuild": "next export"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -64,11 +64,13 @@
   "devDependencies": {
     "@types/node": "^20.17.32",
     "@types/react": "^18.2.8",
-    "@types-react-dom": "^18.2.4",
+    "@types/react-dom": "^18.2.4",
     "eslint": "^9.25.1",
     "eslint-config-next": "15.1.4",
+    "husky": "^8.0.3",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3"
-  }
+  },
+  "packageManager": "pnpm@8.15.6"
 }
