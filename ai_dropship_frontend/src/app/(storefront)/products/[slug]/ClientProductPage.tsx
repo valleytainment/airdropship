@@ -1,7 +1,7 @@
 // Simplified imports
 'use client';
 import { useState, useEffect } from 'react';
-import { AddToCartButton } from '@/components/cart/add-to-cart-button';
+import AddToCartButton from '@/components/store/AddToCartButton';
 import { formatPrice } from '@/lib/utils';
 
 export function ClientProductPage({ product }: { product: Product }) {

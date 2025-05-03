@@ -1,25 +1,16 @@
-// Add this import at the top
-import Link from 'next/link';
+// src/app/(storefront)/checkout/page.tsx
+import Link from 'next/link';                     // ➊
+import { yourOtherImports } from '@/components';  // (whatever else you need)
 
-// Replace the problematic JSX
-// Change this:
-<a href="/products/">Continue Shopping</a>
+export default function CheckoutPage() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* … your checkout UI … */}
 
-// To this:
-<Link href="/products/" className="text-blue-600 hover:underline">
-  Continue Shopping
-</Link>
-
-// Update the payment intent function
-interface PaymentIntentData {
-  items: Array<{
-    id: string;
-    quantity: number;
-    price: number;
-  }>;
-  customerEmail: string;
-}
-
-async function createPaymentIntent(data: PaymentIntentData) {
-  // ... existing implementation
+      {/* Proper Next.js Link for “Continue Shopping” ↓ */}
+      <Link href="/products/" className="text-blue-600 hover:underline">
+        Continue Shopping
+      </Link>
+    </div>
+  )
 }
