@@ -1,4 +1,4 @@
-"use client";
+"use client"; // This MUST be the very first line
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -21,8 +21,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [product]);
 
   if (!product) {
-    // This should ideally not happen if data is fetched server-side
-    // but provides a fallback
     return <div className="container mx-auto px-4 py-8 text-center">Product data not available.</div>;
   }
 
@@ -51,7 +49,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             layout="fill"
             objectFit="cover"
             className="rounded-lg"
-            priority // Prioritize loading the main image
+            priority
             onError={(e) => { e.currentTarget.src = "/placeholder-image.jpg"; }}
           />
         </div>
@@ -88,7 +86,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             <div className="flex flex-wrap gap-2">
               {variant.options.map(option => (
                 <Button key={option} variant="outline" size="sm">{option}</Button>
-                // TODO: Add state management to handle variant selection
               ))}
             </div>
           </div>
@@ -96,7 +93,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {/* Add to Cart Button */}
         <AddToCartButton product={{
-           id: product.internal_id.toString(),
+           id: product.internal_id.toString(), // Ensure ID is string for cart
            name: product.title,
            price: product.current_retail_price ?? 0,
            imageUrl: currentImageUrl
@@ -106,4 +103,3 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     </div>
   );
 }
-
