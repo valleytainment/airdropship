@@ -1,94 +1,120 @@
-// src/app/(storefront)/order-confirmation/[orderId]/page.tsx
+"use client";
 
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
-import type { Metadata } from "next";
-import type { Order } from "@/types";
+import { OrderPublic } from "@/types"; // Assuming types are defined
 
-// 1️⃣ Provide the list of orderId params to pre-render
-export async function generateStaticParams(): Promise<
-  { orderId: string }[]
-> {
-  // For static export, we cannot pre-render dynamic order IDs without knowing them at build time.
-  // Return a dummy param to satisfy Next.js export requirements.
-  // The page component should handle cases where the dummy ID doesn't fetch real data (e.g., show notFound).
-  if (process.env.CI === 'true' || process.env.NODE_ENV === 'production') {
-    return [{ orderId: 'dummy-order' }]; // Provide a dummy param for static export
-  }
-
-  // In development or other environments, try fetching orders (may still fail if backend isn't running)
+// Helper function to fetch order data
+async function getOrderData(orderId: string): Promise<OrderPublic | null> {
   try {
-    const { data: orders } = await apiClient.get<Order[]>("/orders");
-    // Ensure orders is an array before mapping
-    if (Array.isArray(orders)) {
-        return orders.map((order) => ({ orderId: order.id }));
-    } else {
-        console.warn("Fetched orders is not an array:", orders);
-        return [{ orderId: 'dummy-order' }]; // Fallback if API response is unexpected
-    }
+    const response = await apiClient.get(`/orders/storefront/${orderId}`);
+    return response.data;
   } catch (error) {
-    console.warn("Failed to fetch orders for generateStaticParams:", error);
-    return [{ orderId: 'dummy-order' }]; // Fallback to dummy param on error
+    console.error(`Failed to fetch order ${orderId}:`, error);
+    // Handle specific errors, e.g., 404 Not Found
+    if ((error as any).response?.status === 404) {
+      throw new Error("Order not found.");
+    }
+    throw new Error("Failed to load order details.");
   }
 }
 
-// 2️⃣ Generate per-page metadata (await params)
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ orderId: string }>;
-}): Promise<Metadata> {
-  const { orderId } = await params;
-  return {
-    title: `Order ${orderId} Confirmation`,
-    description: `Details for order ${orderId}`,
-  };
-}
+export default function OrderConfirmationPage() {
+  const params = useParams();
+  const orderId = params?.orderId as string;
+  const [order, setOrder] = useState<OrderPublic | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-// 3️⃣ Default export: async page component with Promise params
-export default async function OrderConfirmationPage({
-  params,
-}: {
-  params: Promise<{ orderId: string }>;
-}) {
-  const { orderId } = await params;
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!orderId) {
+        setError("Order ID is missing.");
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const data = await getOrderData(orderId);
+        setOrder(data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || "An unknown error occurred.");
+        setOrder(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  let order: Order;
-  try {
-    const res = await apiClient.get<Order>(`/orders/${orderId}`);
-    order = res.data;
-  } catch {
-    return notFound();
-  }
+    fetchOrder();
+  }, [orderId]);
+
+  // generateStaticParams is not suitable here as order IDs are dynamic
+  // and this page is typically viewed immediately after checkout.
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">
-        Thank You for Your Purchase!
-      </h1>
-      <p className="mb-2">
-        <strong>Order #:</strong> {orderId}
-      </p>
-      <p className="mb-6">
-        A confirmation email has been sent to <strong>{order.email}</strong>.
-      </p>
+    <div className="container mx-auto px-4 py-16">
+      {loading && (
+        <div className="text-center">Loading order confirmation...</div>
+      )}
 
-      <h2 className="text-2xl font-semibold mb-2">Order Details</h2>
-      <ul className="list-disc pl-5 space-y-1">
-        {order.items.map((item) => (
-          <li key={item.id}>
-            {item.name} × {item.quantity} — $
-            {((item.price * item.quantity) / 100).toFixed(2)}
-          </li>
-        ))}
-      </ul>
+      {error && (
+        <div className="text-center text-red-500">
+          <h1 className="text-2xl font-bold mb-4">Error</h1>
+          <p>{error}</p>
+          <Link href="/" legacyBehavior>
+            <Button className="mt-6">Go to Homepage</Button>
+          </Link>
+        </div>
+      )}
 
-      <div className="mt-8">
-        <Link href="/products" className="text-blue-600 hover:underline">
-          Continue Shopping
-        </Link>
-      </div>
+      {!loading && !error && order && (
+        <div className="text-center">
+          <div className="mb-6">
+            <svg className="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold mb-4">Thank You for Your Order!</h1>
+          <p className="text-gray-600 mb-2">Your order has been placed successfully.</p>
+          <p className="text-gray-600 mb-8">
+            Order ID: <span className="font-medium text-gray-800">{order.id}</span>
+          </p>
+
+          {/* Order Summary Section */}
+          <div className="max-w-md mx-auto border rounded-lg p-6 text-left mb-8">
+            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <div className="mb-4">
+              <p><strong>Email:</strong> {order.customer_email}</p>
+              <p><strong>Shipping Address:</strong> {order.shipping_address}</p>
+            </div>
+            <div className="space-y-2 mb-4">
+              {order.items.map(item => (
+                <div key={item.id} className="flex justify-between text-sm border-b pb-1">
+                  <div>
+                    <span className="font-medium">{item.product?.title || `Product ID: ${item.product_id}`}</span>
+                    <span className="text-gray-500"> (x{item.quantity})</span>
+                  </div>
+                  <span>${(item.price_per_unit * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
+              <span>Total Paid</span>
+              <span>${order.total_amount.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <p className="text-gray-500 mb-4">You will receive an email confirmation shortly.</p>
+          <Link href="/" legacyBehavior>
+            <Button>Continue Shopping</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
+
