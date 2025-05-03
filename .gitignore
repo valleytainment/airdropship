@@ -1,8 +1,7 @@
-# Node
+# monorepo builds
 node_modules/
-.next/
-package-lock.json
+**/node_modules/
 pnpm-lock.yaml
-
-# Local files
+package-lock.json
+**/.next/
 cmd.exe
