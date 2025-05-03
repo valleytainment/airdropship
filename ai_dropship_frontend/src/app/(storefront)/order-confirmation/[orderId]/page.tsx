@@ -7,6 +7,13 @@ import { useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
 import { OrderPublic } from "@/types"; // Assuming types are defined
 
+// Required for static export with dynamic routes, even if we don't pre-render specific orders
+export async function generateStaticParams() {
+  // We don't need to pre-render any specific order confirmation pages
+  // Return an empty array to satisfy the build requirement
+  return [];
+}
+
 // Helper function to fetch order data
 async function getOrderData(orderId: string): Promise<OrderPublic | null> {
   try {
@@ -51,9 +58,6 @@ export default function OrderConfirmationPage() {
 
     fetchOrder();
   }, [orderId]);
-
-  // generateStaticParams is not suitable here as order IDs are dynamic
-  // and this page is typically viewed immediately after checkout.
 
   return (
     <div className="container mx-auto px-4 py-16">
