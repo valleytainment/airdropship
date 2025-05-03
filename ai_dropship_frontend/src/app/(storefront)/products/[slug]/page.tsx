@@ -2,7 +2,7 @@
 import { notFound } from "next/navigation";
 import apiClient from "@/lib/apiClient";
 import { ProductPublic } from "@/types";
-import ProductDetailClient from "@/components/store/ProductDetailClient"; // Import the new client component
+import ProductDetailClient from "@/components/store/ProductDetailClient"; // Import the client component
 
 // Fetch all product IDs for static generation
 export async function generateStaticParams() {
@@ -13,31 +13,31 @@ export async function generateStaticParams() {
     const products = response.data?.products || [];
 
     // Return an array of objects with the `slug` parameter
-    return products.map((product: { id: number }) => ({
-      slug: product.id.toString(),
+    return products.map((product: { internal_id: number }) => ({
+      slug: product.internal_id.toString(), // Use internal_id from backend
     }));
   } catch (error) {
     console.error("Failed to generate static params for products:", error);
     // Return an empty array or default paths in case of error
-    // Returning empty means pages will be generated on demand if fallback is enabled,
-    // or result in 404s if fallback is false.
     return [];
   }
 }
 
-// Fetch data for a specific product
+// Fetch data for a specific product (Server-side)
 async function getProductData(slug: string): Promise<ProductPublic | null> {
   try {
+    // Use internal_id which corresponds to the slug
     const response = await apiClient.get(`/products/storefront/${slug}`);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch product ${slug}:`, error);
-    // Handle specific errors, e.g., 404 Not Found
     if ((error as any).response?.status === 404) {
       return null; // Let the page handle the not found case
     }
     // Re-throw other errors or return null based on desired behavior
-    throw error;
+    // Consider throwing error to trigger Next.js error handling
+    // throw new Error(`Failed to load product ${slug}`);
+     return null; // Return null for now, page will show notFound()
   }
 }
 
@@ -56,3 +56,4 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
     </div>
   );
 }
+
