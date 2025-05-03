@@ -1,11 +1,14 @@
 // ai_dropship_frontend/next.config.js
 
-// Polyfill matchMedia so SSR on Netlify never blows up when calling `.matches`
-if (typeof global.matchMedia !== "function") {
+const webpack = require('webpack');
+
+// In Node/SSR, ensure global.matchMedia exists:
+if (typeof global.matchMedia !== 'function') {
   global.matchMedia = () => ({
     matches: false,
-    addListener: () => {},        // legacy
-    removeListener: () => {},     // legacy
+    media: '',
+    addListener: () => {},
+    removeListener: () => {},
     addEventListener: () => {},
     removeEventListener: () => {},
     onchange: null,
@@ -15,20 +18,23 @@ if (typeof global.matchMedia !== "function") {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Output a fully static export
-  output: "export",
+  // Static export
+  output: 'export',
 
-  // Skip ESLint checks during CI/build
-  eslint: {
-    ignoreDuringBuilds: true,
+  // Ignore lint/type errors in CI
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+
+  // Patch the webpack build so any window.matchMedia calls use our stub:
+  webpack: (config) => {
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        // This injects at compile time a no-op function:
+        'window.matchMedia': 'function(query) { return { matches: false, media: query, addListener: ()=>{}, removeListener: ()=>{}, addEventListener: ()=>{}, removeEventListener: ()=>{}, onchange: null, dispatchEvent: ()=>false }; }'
+      })
+    );
+    return config;
   },
-
-  // Skip TypeScript type errors during CI/build
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
-  // …any other Next.js settings you already had…
 };
 
 module.exports = nextConfig;
