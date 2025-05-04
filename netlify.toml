@@ -1,12 +1,13 @@
 # netlify.toml at repo root
 
 [build]
-  # Base directory is repo root
-  # Command to build the specific frontend package
+  # Explicitly set base directory to repository root
+  base = "."
+  # Command to build the specific frontend package from the root
   # 1. Install dependencies for the workspace
   # 2. Build the specific frontend package using pnpm filter
   command = "pnpm install --frozen-lockfile && pnpm --filter ai_dropship_frontend run build"
-  # Publish the output directory of the frontend package
+  # Publish the output directory of the frontend package, relative to the root
   publish = "ai_dropship_frontend/out"
 
 [build.environment]
@@ -14,7 +15,4 @@
   PNPM_VERSION = "8"
   # Set NODE_VERSION if needed, Netlify often defaults to a reasonable LTS
   # NODE_VERSION = "22"
-  # CI=true is often needed for Next.js builds in CI environments
-  # It's handled in next.config.js but can be set here too if needed
-  # CI = "true"
 
