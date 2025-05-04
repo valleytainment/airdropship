@@ -1,13 +1,18 @@
+"use client"; // Ensure this is a client component as it uses hooks
 
-"use client"; // Ensure this is a client component as it uses hooks (useCart)
-import { useCart } from "@/context/CartContext";
-import { Button } from "@/components/ui/button"; // Assuming Button component exists
-import { Input } from "@/components/ui/input"; // Assuming Input component exists
-import { Label } from "@/components/ui/label"; // Assuming Label component exists
+// import { useCart } from "@/context/CartContext"; // Remove old context import
+import { useCartStore } from "@/lib/stores/cart"; // Import the new zustand store
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useRouter } from 'next/navigation'; // Import useRouter for redirection
 
-export default function CheckoutPage() { // Renamed to avoid conflict with HTML tags
-  const { cart } = useCart();
+export default function CheckoutPage() {
+  // Use the zustand store
+  const { items: cartItems, totalPrice, clearCart } = useCartStore();
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     email: "",
     address: "",
@@ -16,21 +21,31 @@ export default function CheckoutPage() { // Renamed to avoid conflict with HTML 
     cvc: "",
   });
 
-  const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Get total amount from the zustand store's selector function
+  const totalAmount = totalPrice();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement actual checkout logic (e.g., API call to process payment)
     console.log("Submitting checkout form:", formData);
-    console.log("Cart items:", cart);
-    // Redirect to order confirmation page upon successful checkout
-    // Example: router.push("/order-confirmation/some-order-id");
-    alert("Checkout submitted (mock)! See console for details.");
+    console.log("Cart items:", cartItems);
+    
+    // Simulate successful checkout
+    const mockOrderId = `mock-${Date.now()}`;
+    console.log(`Mock checkout successful. Order ID: ${mockOrderId}`);
+
+    // Clear the cart after successful checkout
+    clearCart();
+
+    // Redirect to order confirmation page
+    router.push(`/order-confirmation/${mockOrderId}`);
+    
+    // alert("Checkout submitted (mock)! See console for details."); // Remove alert
   };
 
   return (
@@ -41,22 +56,22 @@ export default function CheckoutPage() { // Renamed to avoid conflict with HTML 
         {/* Order Summary */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-          <div className="cart-items space-y-4 border rounded-lg p-4 bg-gray-50">
-            {cart.length === 0 ? (
-              <p>Your cart is empty.</p>
+          <div className="cart-items space-y-4 border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+            {cartItems.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400">Your cart is empty.</p>
             ) : (
-              cart.map(item => (
-                <div key={item.id} className="cart-item flex justify-between items-center border-b pb-2">
+              cartItems.map(item => (
+                <div key={item.id} className="cart-item flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
                   <div>
-                    <h3 className="font-medium">{item.name}</h3>
-                    <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">{item.name}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Quantity: {item.quantity}</p>
                   </div>
-                  <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">${(item.price * item.quantity).toFixed(2)}</p>
                 </div>
               ))
             )}
-            {cart.length > 0 && (
-              <div className="text-right font-bold text-lg mt-4 pt-2 border-t">
+            {cartItems.length > 0 && (
+              <div className="text-right font-bold text-lg mt-4 pt-2 border-t border-gray-200 dark:border-gray-700">
                 Total: ${totalAmount.toFixed(2)}
               </div>
             )}
@@ -128,7 +143,7 @@ export default function CheckoutPage() { // Renamed to avoid conflict with HTML 
               </div>
             </div>
             
-            <Button type="submit" className="w-full mt-4" disabled={cart.length === 0}>
+            <Button type="submit" className="w-full mt-4" disabled={cartItems.length === 0}>
               Complete Purchase
             </Button>
           </form>

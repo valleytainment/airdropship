@@ -2,14 +2,15 @@
 "use client";
 
 import { useState } from "react";
-import { Product } from "@/types";
-import { useCart } from "@/lib/hooks/useCart";
+import { ProductPublic } from "@/types"; // Use the shared ProductPublic type
+// import { useCart } from "@/lib/hooks/useCart"; // Remove old hook import
+import { useCartStore } from "@/lib/stores/cart"; // Import the new zustand store
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 // import { useToast } from "@/components/ui/use-toast"; // Optional
 
 interface AddToCartButtonProps {
-  product: Product;
+  product: ProductPublic; // Use ProductPublic type
   quantity?: number; // Allow specifying quantity, default to 1
   className?: string;
   variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
@@ -18,19 +19,23 @@ interface AddToCartButtonProps {
 
 const AddToCartButton = ({
   product,
-  quantity = 1,
+  quantity = 1, // Default quantity is 1
   className,
   variant = "default",
   size = "default",
 }: AddToCartButtonProps) => {
-  const { addToCart } = useCart();
+  // Use the addItem function from the zustand store
+  const { addItem } = useCartStore();
   const [isAdding, setIsAdding] = useState(false);
   // const { toast } = useToast(); // Optional
 
   const handleAddToCart = () => {
     setIsAdding(true);
     try {
-      addToCart(product, quantity);
+      // Add the item multiple times if quantity > 1
+      for (let i = 0; i < quantity; i++) {
+        addItem(product);
+      }
       // Optional: Show success toast
       // toast({ title: "Added to cart", description: `${quantity} x ${product.title}` });
     } catch (error) {
@@ -50,7 +55,7 @@ const AddToCartButton = ({
       className={className}
       variant={variant}
       size={size}
-      aria-label={`Add ${product.title} to cart`}
+      aria-label={`Add ${product.name} to cart`}
     >
       {isAdding ? (
         <span className="animate-pulse">Adding...</span>

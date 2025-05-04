@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { useCart } from '@/context/CartContext';
+// import { useCart } from '@/context/CartContext'; // Remove old context import
+import { useCartStore } from '@/lib/stores/cart'; // Import the new zustand store
 import { ProductPublic } from '@/types'; // Use the shared ProductPublic type
 import ProductImage from './ProductImage'; // Import the optimized image component
 import { Button } from '@/components/ui/button'; // Assuming shadcn/ui Button is installed
@@ -9,18 +10,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
+  // Use the addItem function from the zustand store
+  const { addItem } = useCartStore();
 
-  // Ensure the product object passed to addToCart matches the CartItem structure
-  // Assuming CartItem needs id, name, price, and potentially image
   const handleAddToCart = () => {
-    addToCart({
-      id: product.id, // Use the actual product ID
-      name: product.name,
-      price: product.price,
-      image: product.image, // Pass image if needed by cart
-      quantity: 1 // Default quantity to add
-    });
+    // Pass the whole product object to addItem
+    addItem(product);
   };
 
   return (
@@ -30,7 +25,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </Link>
       <div className="flex flex-1 flex-col space-y-2 p-4">
         <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          <Link href={`/products/${product.slug}">
+          <Link href={`/products/${product.slug}`}>
             <span aria-hidden="true" className="absolute inset-0" />
             {product.name}
           </Link>

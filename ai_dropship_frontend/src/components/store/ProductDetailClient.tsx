@@ -12,11 +12,15 @@ interface ProductDetailClientProps {
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  // TODO: Add state for selected variant options if needed
 
   // Initialize selectedImage when product data is available
   useEffect(() => {
     if (product) {
-      setSelectedImage(product.images?.split(",")[0] || "/placeholder-image.jpg");
+      // Use product.image directly if it's the primary image URL
+      // Or parse product.images if it's a comma-separated list
+      const images = product.image?.split(",") || [];
+      setSelectedImage(images[0] || "/placeholder-image.jpg");
     }
   }, [product]);
 
@@ -24,57 +28,49 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     return <div className="container mx-auto px-4 py-8 text-center">Product data not available.</div>;
   }
 
-  const productImages = product.images?.split(",") || ["/placeholder-image.jpg"];
+  // Use product.image directly or parse if it's a list
+  const productImages = product.image?.split(",") || ["/placeholder-image.jpg"];
   const currentImageUrl = selectedImage || productImages[0];
 
-  // Basic parsing for variants
+  // Basic parsing for variants - Consider a more robust parsing or data structure
   let variants: { name: string; options: string[] }[] = [];
-  if (product.variants) {
-    try {
-      // Attempt to parse variants, ensure it's valid JSON
-      const parsedVariants = JSON.parse(product.variants);
-      // Basic validation: check if it's an array
-      if (Array.isArray(parsedVariants)) {
-          variants = parsedVariants;
-      } else {
-          console.warn("Parsed product variants is not an array:", parsedVariants);
-      }
-    } catch (e) {
-      console.error("Failed to parse product variants JSON:", e, "Raw variants string:", product.variants);
-      // Keep variants as empty array if parsing fails
-    }
-  }
+  // Assuming variants might be stored differently, adjust parsing as needed
+  // if (product.variants) { ... } 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {/* Image Gallery */}
       <div>
         {/* Main Image */}
-        <div className="mb-4 relative aspect-square">
+        <div className="mb-4 relative aspect-square overflow-hidden rounded-lg border dark:border-gray-700">
           <Image
             src={currentImageUrl}
-            alt={product.title}
-            fill={true} // Use fill instead of layout="fill"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add sizes prop for responsive images
-            style={{ objectFit: "cover" }} // Use style object for objectFit
-            className="rounded-lg"
-            priority
+            alt={product.name} // Use product.name
+            fill={true}
+            sizes="(max-width: 768px) 100vw, 50vw" // Simplified sizes
+            style={{ objectFit: "cover" }}
+            className="transition-transform duration-300 group-hover:scale-105"
+            priority // Prioritize loading the main image
             onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-image.jpg"; }}
           />
         </div>
         {/* Thumbnails */}
         {productImages.length > 1 && (
-          <div className="flex space-x-2 overflow-x-auto">
+          <div className="flex space-x-2 overflow-x-auto pb-2">
             {productImages.map((img, index) => (
-              <div key={index} className={`relative w-20 h-20 flex-shrink-0 border-2 ${img === selectedImage ? 'border-blue-500' : 'border-transparent'} hover:border-gray-400`}>
+              <div 
+                key={index} 
+                className={`relative w-20 h-20 flex-shrink-0 border-2 rounded-md overflow-hidden cursor-pointer 
+                           ${img === selectedImage ? 'border-blue-500' : 'border-transparent hover:border-gray-400 dark:hover:border-gray-600'}`}
+                onClick={() => setSelectedImage(img)}
+              >
                  <Image
                   src={img}
-                  alt={`${product.title} thumbnail ${index + 1}`}
+                  alt={`${product.name} thumbnail ${index + 1}`}
                   fill={true}
-                  sizes="5rem" // Specify size for thumbnails
+                  sizes="5rem"
                   style={{ objectFit: "cover" }}
-                  className="rounded cursor-pointer"
-                  onClick={() => setSelectedImage(img)}
+                  className="transition-opacity duration-200 hover:opacity-80"
                   onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-image.jpg"; }}
                 />
               </div>
@@ -84,31 +80,26 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </div>
 
       {/* Product Details */}
-      <div>
-        <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
-        <p className="text-2xl text-gray-800 mb-4">${product.current_retail_price?.toFixed(2) ?? 'N/A'}</p>
-        <p className="text-gray-600 mb-6">{product.ai_description || product.description || "No description available."}</p>
+      <div className="flex flex-col">
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">{product.name}</h1>
+        <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">${product.price?.toFixed(2) ?? 'N/A'}</p>
+        {/* Use a dedicated component for rendering description if it can contain HTML */}
+        <div 
+          className="prose dark:prose-invert text-gray-600 dark:text-gray-300 mb-6"
+          dangerouslySetInnerHTML={{ __html: product.description || "No description available." }}
+        />
 
-        {/* Variants - Ensure variants is an array before mapping */}
-        {Array.isArray(variants) && variants.length > 0 && variants.map((variant, vIndex) => (
-          <div key={vIndex} className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">{variant.name}</label>
-            <div className="flex flex-wrap gap-2">
-              {/* Ensure variant.options is also an array */}
-              {Array.isArray(variant.options) && variant.options.map(option => (
-                <Button key={option} variant="outline" size="sm">{option}</Button>
-              ))}
-            </div>
-          </div>
-        ))}
+        {/* Variants - Placeholder for future implementation */}
+        {/* {Array.isArray(variants) && variants.length > 0 && ... } */}
 
-        {/* Add to Cart Button */}
-        <AddToCartButton product={{
-           id: product.internal_id.toString(), // Ensure ID is string for cart
-           name: product.title,
-           price: product.current_retail_price ?? 0,
-           imageUrl: currentImageUrl
-        }} />
+        {/* Add to Cart Button - Pass the full product object */}
+        <div className="mt-auto pt-6">
+          <AddToCartButton 
+            product={product} // Pass the whole product object
+            className="w-full"
+            size="lg"
+          />
+        </div>
 
       </div>
     </div>
