@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/lib/hooks/useCart";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react"; // Import useMemo
 import apiClient from "@/lib/apiClient";
 import { OrderCreate, OrderItemCreate, OrderPublic } from "@/types"; // Assuming types are defined
 
@@ -24,10 +24,22 @@ export default function CheckoutPage() {
     setIsClient(true);
   }, []);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 0 ? 5.00 : 0; // Dummy shipping
-  const tax = subtotal * 0.08; // Dummy tax
-  const total = subtotal + shipping + tax;
+  // Calculate totals only when on client and cart is available
+  const { subtotal, shipping, tax, total } = useMemo(() => {
+    if (!isClient) {
+      return { subtotal: 0, shipping: 0, tax: 0, total: 0 };
+    }
+    const calculatedSubtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const calculatedShipping = calculatedSubtotal > 0 ? 5.00 : 0; // Dummy shipping
+    const calculatedTax = calculatedSubtotal * 0.08; // Dummy tax
+    const calculatedTotal = calculatedSubtotal + calculatedShipping + calculatedTax;
+    return {
+      subtotal: calculatedSubtotal,
+      shipping: calculatedShipping,
+      tax: calculatedTax,
+      total: calculatedTotal,
+    };
+  }, [cart, isClient]);
 
   const handlePlaceOrder = async () => {
     if (!email || !address) { // Basic validation
@@ -62,7 +74,8 @@ export default function CheckoutPage() {
       // Clear cart after successful order
       clearCart();
 
-      // Redirect to order confirmation page with the actual order ID from backend
+      // Redirect to order confirmation page using the correct route
+      // Note: We renamed the route segment earlier
       router.push(`/order-confirmation/${createdOrder.id}`);
 
     } catch (err: any) {
@@ -74,10 +87,11 @@ export default function CheckoutPage() {
   };
 
   if (!isClient) {
-    return null; // Or a loading skeleton
+    // Render loading state during SSR/SSG
+    return <div className="container mx-auto px-4 py-8 text-center">Loading checkout...</div>;
   }
 
-  if (cart.length === 0 && isClient) { // Check isClient to avoid flash of this message on load
+  if (cart.length === 0) { // No need to check isClient here, as we already returned if !isClient
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <p className="text-gray-500">Your cart is empty. Cannot proceed to checkout.</p>

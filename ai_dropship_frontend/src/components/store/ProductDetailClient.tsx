@@ -1,4 +1,4 @@
-"use client";
+"use client"; // This MUST be the very first line
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -21,8 +21,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [product]);
 
   if (!product) {
-    // This should ideally not happen if data is fetched server-side
-    // but provides a fallback
     return <div className="container mx-auto px-4 py-8 text-center">Product data not available.</div>;
   }
 
@@ -33,9 +31,17 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   let variants: { name: string; options: string[] }[] = [];
   if (product.variants) {
     try {
-      variants = JSON.parse(product.variants);
+      // Attempt to parse variants, ensure it's valid JSON
+      const parsedVariants = JSON.parse(product.variants);
+      // Basic validation: check if it's an array
+      if (Array.isArray(parsedVariants)) {
+          variants = parsedVariants;
+      } else {
+          console.warn("Parsed product variants is not an array:", parsedVariants);
+      }
     } catch (e) {
-      console.error("Failed to parse product variants:", e);
+      console.error("Failed to parse product variants JSON:", e, "Raw variants string:", product.variants);
+      // Keep variants as empty array if parsing fails
     }
   }
 
@@ -48,11 +54,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <Image
             src={currentImageUrl}
             alt={product.title}
-            layout="fill"
-            objectFit="cover"
+            fill={true} // Use fill instead of layout="fill"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add sizes prop for responsive images
+            style={{ objectFit: "cover" }} // Use style object for objectFit
             className="rounded-lg"
-            priority // Prioritize loading the main image
-            onError={(e) => { e.currentTarget.src = "/placeholder-image.jpg"; }}
+            priority
+            onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-image.jpg"; }}
           />
         </div>
         {/* Thumbnails */}
@@ -63,11 +70,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                  <Image
                   src={img}
                   alt={`${product.title} thumbnail ${index + 1}`}
-                  layout="fill"
-                  objectFit="cover"
+                  fill={true}
+                  sizes="5rem" // Specify size for thumbnails
+                  style={{ objectFit: "cover" }}
                   className="rounded cursor-pointer"
                   onClick={() => setSelectedImage(img)}
-                  onError={(e) => { e.currentTarget.src = "/placeholder-image.jpg"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-image.jpg"; }}
                 />
               </div>
             ))}
@@ -81,14 +89,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         <p className="text-2xl text-gray-800 mb-4">${product.current_retail_price?.toFixed(2) ?? 'N/A'}</p>
         <p className="text-gray-600 mb-6">{product.ai_description || product.description || "No description available."}</p>
 
-        {/* Variants */}
-        {variants && variants.length > 0 && variants.map((variant, vIndex) => (
+        {/* Variants - Ensure variants is an array before mapping */}
+        {Array.isArray(variants) && variants.length > 0 && variants.map((variant, vIndex) => (
           <div key={vIndex} className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">{variant.name}</label>
             <div className="flex flex-wrap gap-2">
-              {variant.options.map(option => (
+              {/* Ensure variant.options is also an array */}
+              {Array.isArray(variant.options) && variant.options.map(option => (
                 <Button key={option} variant="outline" size="sm">{option}</Button>
-                // TODO: Add state management to handle variant selection
               ))}
             </div>
           </div>
@@ -96,7 +104,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {/* Add to Cart Button */}
         <AddToCartButton product={{
-           id: product.internal_id.toString(),
+           id: product.internal_id.toString(), // Ensure ID is string for cart
            name: product.title,
            price: product.current_retail_price ?? 0,
            imageUrl: currentImageUrl

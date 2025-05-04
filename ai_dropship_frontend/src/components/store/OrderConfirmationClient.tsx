@@ -2,22 +2,22 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useParams } from "next/navigation"; // Keep useParams here if needed, or pass orderId as prop
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
-import { OrderPublic } from "@/types";
+import { OrderPublic } from "@/types"; // Assuming types are defined
 
 interface OrderConfirmationClientProps {
-  orderId: string; // Receive orderId as a prop
+  confirmationId: string; // Renamed from orderId
 }
 
-// Helper function to fetch order data (can stay here or be moved to lib)
-async function getOrderData(orderId: string): Promise<OrderPublic | null> {
+// Helper function to fetch order data (remains client-side for this component)
+async function getOrderData(confirmationId: string): Promise<OrderPublic | null> {
   try {
-    const response = await apiClient.get(`/orders/storefront/${orderId}`);
+    // Use confirmationId in the API call
+    const response = await apiClient.get(`/orders/storefront/${confirmationId}`);
     return response.data;
   } catch (error) {
-    console.error(`Failed to fetch order ${orderId}:`, error);
+    console.error(`Failed to fetch order ${confirmationId}:`, error);
     if ((error as any).response?.status === 404) {
       throw new Error("Order not found.");
     }
@@ -25,21 +25,21 @@ async function getOrderData(orderId: string): Promise<OrderPublic | null> {
   }
 }
 
-export default function OrderConfirmationClient({ orderId }: OrderConfirmationClientProps) {
+export default function OrderConfirmationClient({ confirmationId }: OrderConfirmationClientProps) {
   const [order, setOrder] = useState<OrderPublic | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!orderId) {
-        setError("Order ID is missing.");
+      if (!confirmationId) {
+        setError("Confirmation ID is missing."); // Updated error message
         setLoading(false);
         return;
       }
       try {
         setLoading(true);
-        const data = await getOrderData(orderId);
+        const data = await getOrderData(confirmationId);
         setOrder(data);
         setError(null);
       } catch (err: any) {
@@ -51,9 +51,8 @@ export default function OrderConfirmationClient({ orderId }: OrderConfirmationCl
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [confirmationId]); // Depend on confirmationId
 
-  // Render logic remains the same
   return (
     <div className="container mx-auto px-4 py-16">
       {loading && (
@@ -91,7 +90,8 @@ export default function OrderConfirmationClient({ orderId }: OrderConfirmationCl
               <p><strong>Shipping Address:</strong> {order.shipping_address}</p>
             </div>
             <div className="space-y-2 mb-4">
-              {order.items.map(item => (
+              {/* Ensure order.items is an array before mapping */}
+              {Array.isArray(order.items) && order.items.map(item => (
                 <div key={item.id} className="flex justify-between text-sm border-b pb-1">
                   <div>
                     <span className="font-medium">{item.product?.title || `Product ID: ${item.product_id}`}</span>

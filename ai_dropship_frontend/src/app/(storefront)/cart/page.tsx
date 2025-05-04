@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -16,11 +15,13 @@ export default function CartPage() {
     setIsClient(true);
   }, []);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Calculate subtotal only when running on the client and cart is available
+  const subtotal = isClient ? cart.reduce((sum, item) => sum + item.price * item.quantity, 0) : 0;
 
   if (!isClient) {
     // Render nothing or a loading state during SSR/SSG
-    return null; 
+    // A simple loading indicator might be better UX
+    return <div className="container mx-auto px-4 py-8 text-center">Loading cart...</div>; 
   }
 
   return (
