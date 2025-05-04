@@ -1,0 +1,28 @@
+// Define the type for mock products
+interface MockProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  description: string;
+}
+
+// Export the mock product data as specified in the checklist
+export const mockProducts: MockProduct[] = [
+  {
+    id: "1",
+    name: "Airdrop Starter Kit",
+    price: 99.99,
+    image: "/placeholder-product.jpg", // Using placeholder as per checklist
+    description: "Essential tools for successful airdrop campaigns",
+  },
+  {
+    id: "2",
+    name: "Token Distribution Suite",
+    price: 149.99,
+    image: "/placeholder-product.jpg", // Using placeholder as per checklist
+    description: "Complete package for token distribution",
+  },
+  // Add more mock products if needed
+];
+

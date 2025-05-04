@@ -86,3 +86,40 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+/* Styles added from user checklist */
+
+/* Responsive grid system */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* Product card styling (Enhancement to existing Tailwind) */
+.product-card {
+  /* Base styles already applied via Tailwind classes in component */
+  /* Add transition if not already present */
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  /* Enhance hover effect if needed */
+  transform: translateY(-5px);
+}
+
+/* Checkout form (Enhancement to existing Tailwind) */
+.checkout-form {
+  /* Base layout already applied via Tailwind classes in component */
+  /* Add max-width and margin if needed */
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
