@@ -19,7 +19,7 @@ importers:
     dependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
-        version: 3.10.0(react-hook-form@7.56.1(react@18.3.1))
+        version: 3.10.0(react-hook-form@7.56.2(react@18.3.1))
       '@opennextjs/cloudflare':
         specifier: 1.0.0-beta.4
         version: 1.0.0-beta.4(wrangler@4.14.1)
@@ -117,8 +117,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0(@types/react-dom@18.3.7(@types/react@18.3.20))(@types/react@18.3.20)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
-        specifier: ^4.1.0
-        version: 4.1.0
+        specifier: 3.3.1
+        version: 3.3.1
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@18.3.1)
@@ -139,13 +139,13 @@ importers:
         version: 18.3.1
       react-day-picker:
         specifier: 8.10.1
-        version: 8.10.1(date-fns@4.1.0)(react@18.3.1)
+        version: 8.10.1(date-fns@3.3.1)(react@18.3.1)
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
       react-hook-form:
         specifier: ^7.56.1
-        version: 7.56.1(react@18.3.1)
+        version: 7.56.2(react@18.3.1)
       react-resizable-panels:
         specifier: ^2.1.9
         version: 2.1.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2917,8 +2917,8 @@ packages:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
 
-  date-fns@4.1.0:
-    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
+  date-fns@3.3.1:
+    resolution: {integrity: sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==}
 
   debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
@@ -4110,8 +4110,8 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
-  react-hook-form@7.56.1:
-    resolution: {integrity: sha512-qWAVokhSpshhcEuQDSANHx3jiAEFzu2HAaaQIzi/r9FNPm1ioAvuJSD4EuZzWd7Al7nTRKcKPnBKO7sRn+zavQ==}
+  react-hook-form@7.56.2:
+    resolution: {integrity: sha512-vpfuHuQMF/L6GpuQ4c3ZDo+pRYxIi40gQqsCmmfUBwm+oqvBhKhwghCuj2o00YCgSfU6bR9KC/xnQGWm3Gr08A==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -5992,9 +5992,9 @@ snapshots:
 
   '@floating-ui/utils@0.2.9': {}
 
-  '@hookform/resolvers@3.10.0(react-hook-form@7.56.1(react@18.3.1))':
+  '@hookform/resolvers@3.10.0(react-hook-form@7.56.2(react@18.3.1))':
     dependencies:
-      react-hook-form: 7.56.1(react@18.3.1)
+      react-hook-form: 7.56.2(react@18.3.1)
 
   '@humanfs/core@0.19.1': {}
 
@@ -8189,7 +8189,7 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.2
 
-  date-fns@4.1.0: {}
+  date-fns@3.3.1: {}
 
   debug@3.2.7:
     dependencies:
@@ -9559,9 +9559,9 @@ snapshots:
       iconv-lite: 0.6.3
       unpipe: 1.0.0
 
-  react-day-picker@8.10.1(date-fns@4.1.0)(react@18.3.1):
+  react-day-picker@8.10.1(date-fns@3.3.1)(react@18.3.1):
     dependencies:
-      date-fns: 4.1.0
+      date-fns: 3.3.1
       react: 18.3.1
 
   react-dom@18.3.1(react@18.3.1):
@@ -9570,7 +9570,7 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
 
-  react-hook-form@7.56.1(react@18.3.1):
+  react-hook-form@7.56.2(react@18.3.1):
     dependencies:
       react: 18.3.1
 

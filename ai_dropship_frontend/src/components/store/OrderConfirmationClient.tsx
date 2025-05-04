@@ -7,17 +7,17 @@ import apiClient from "@/lib/apiClient";
 import { OrderPublic } from "@/types"; // Assuming types are defined
 
 interface OrderConfirmationClientProps {
-  confirmationId: string; // Renamed from orderId
+  orderId: string; // Use orderId to match the parent Server Component
 }
 
 // Helper function to fetch order data (remains client-side for this component)
-async function getOrderData(confirmationId: string): Promise<OrderPublic | null> {
+async function getOrderData(orderId: string): Promise<OrderPublic | null> {
   try {
-    // Use confirmationId in the API call
-    const response = await apiClient.get(`/orders/storefront/${confirmationId}`);
+    // Use orderId in the API call
+    const response = await apiClient.get(`/orders/storefront/${orderId}`);
     return response.data;
   } catch (error) {
-    console.error(`Failed to fetch order ${confirmationId}:`, error);
+    console.error(`Failed to fetch order ${orderId}:`, error);
     if ((error as any).response?.status === 404) {
       throw new Error("Order not found.");
     }
@@ -25,21 +25,21 @@ async function getOrderData(confirmationId: string): Promise<OrderPublic | null>
   }
 }
 
-export default function OrderConfirmationClient({ confirmationId }: OrderConfirmationClientProps) {
+export default function OrderConfirmationClient({ orderId }: OrderConfirmationClientProps) {
   const [order, setOrder] = useState<OrderPublic | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!confirmationId) {
-        setError("Confirmation ID is missing."); // Updated error message
+      if (!orderId) {
+        setError("Order ID is missing."); // Updated error message
         setLoading(false);
         return;
       }
       try {
         setLoading(true);
-        const data = await getOrderData(confirmationId);
+        const data = await getOrderData(orderId);
         setOrder(data);
         setError(null);
       } catch (err: any) {
@@ -51,7 +51,7 @@ export default function OrderConfirmationClient({ confirmationId }: OrderConfirm
     };
 
     fetchOrder();
-  }, [confirmationId]); // Depend on confirmationId
+  }, [orderId]); // Depend on orderId
 
   return (
     <div className="container mx-auto px-4 py-16">
