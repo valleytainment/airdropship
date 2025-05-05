@@ -1,15 +1,23 @@
-"use client"; // Required for useState
+"use client"; // Required for useState, useEffect
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Import useEffect
 import Link from "next/link";
-import { ShoppingCart, User, Menu, X } from "lucide-react"; // Import Menu and X icons
+import { ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/lib/stores/cart"; // Import zustand store
+import { useCartStore } from "@/lib/stores/cart";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { totalItems } = useCartStore(); // Get totalItems selector
-  const itemCount = totalItems(); // Get current item count
+  const { totalItems } = useCartStore();
+  
+  // State to track client-side mounting
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Get item count only after mounting to avoid hydration mismatch
+  const itemCount = hasMounted ? totalItems() : 0;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -22,8 +30,6 @@ export default function Navbar() {
           {/* Left side: Logo/Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center">
-              {/* Optional: Add a logo here */}
-              {/* <img className="h-8 w-auto" src="/logo.png" alt="AI Dropship Store Logo" /> */}
               <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">AI Dropship Store</span>
             </Link>
           </div>
@@ -33,7 +39,6 @@ export default function Navbar() {
             <Link href="/products" className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white inline-flex items-center px-1 pt-1 text-sm font-medium">
               Products
             </Link>
-            {/* Add other desktop links as needed */}
           </div>
 
           {/* Right side: Icons and Mobile Menu Button */}
@@ -43,8 +48,8 @@ export default function Navbar() {
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="relative text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                   <ShoppingCart className="h-6 w-6" />
-                  {/* Add item count badge */}
-                  {itemCount > 0 && (
+                  {/* Render badge only after mounting and if items exist */}
+                  {hasMounted && itemCount > 0 && (
                     <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
                       {itemCount}
                     </span>
@@ -52,14 +57,14 @@ export default function Navbar() {
                 </Button>
               </Link>
               {/* Account Icon */}
-              <Link href="/account"> {/* Link to account/login page */}
+              <Link href="/account">
                 <Button variant="ghost" size="icon" className="text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                   <User className="h-6 w-6" />
                 </Button>
               </Link>
             </div>
 
-            {/* Mobile Menu Button - Shows only on small screens */}
+            {/* Mobile Menu Button */}
             <div className="ml-2 flex items-center sm:hidden">
               <Button
                 variant="ghost"
@@ -75,16 +80,16 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu - Shows only on small screens when open */}
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="sm:hidden absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 shadow-lg z-40 border-t dark:border-gray-700" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link href="/products" className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium" onClick={toggleMobileMenu}>
               Products
             </Link>
-            {/* Add other mobile links here, mirroring desktop/icons */}
             <Link href="/cart" className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium" onClick={toggleMobileMenu}>
-              Shopping Cart {itemCount > 0 ? `(${itemCount})` : ""}
+              {/* Display cart count in mobile menu only after mount */}
+              Shopping Cart {hasMounted && itemCount > 0 ? `(${itemCount})` : ""}
             </Link>
             <Link href="/account" className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium" onClick={toggleMobileMenu}>
               Account

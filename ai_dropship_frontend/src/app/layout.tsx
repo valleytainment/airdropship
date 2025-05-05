@@ -4,6 +4,7 @@ import './globals.css';
 import { Providers } from './Providers'; // Import the client component for context
 import Navbar from '@/components/Navbar'; // Import the Navbar component
 import Footer from '@/components/Footer'; // Import the Footer component
+import ErrorBoundary from '@/components/ErrorBoundary'; // Import the ErrorBoundary component
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,12 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900`}>
+        {/* Providers wrap everything that needs context */}
         <Providers>
-          <Navbar /> {/* Add Navbar here */}
+          {/* Navbar and Footer are outside the main error boundary, assuming they are less likely to fail */}
+          <Navbar /> 
           <main className="flex-grow container mx-auto px-4 py-8">
-            {children}
+            {/* Wrap the main page content with the Error Boundary */}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </main>
-          <Footer /> {/* Add Footer here */}
+          <Footer /> 
         </Providers>
       </body>
     </html>
