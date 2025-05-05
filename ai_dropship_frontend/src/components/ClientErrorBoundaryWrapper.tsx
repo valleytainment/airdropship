@@ -1,4 +1,4 @@
-"'use client';
+'use client'; // Remove extra quotes
 
 import ErrorBoundary from './ErrorBoundary';
 import React from 'react';
