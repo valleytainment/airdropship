@@ -2,9 +2,10 @@
 
 import { ProductPublic } from "@/types";
 import { mockProducts } from "@/data/products"; // Import mock products
-import Image from "next/image"; // Import Image for basic display
+// Remove direct import of next/image
 import Link from "next/link"; // Import Link for basic navigation
 import { formatPrice } from "@/lib/utils"; // Import formatPrice
+import ProductImage from "@/components/ProductImage"; // Import the new client component
 
 // Fetch data server-side (using mock data directly for static export)
 async function getProducts(): Promise<ProductPublic[]> {
@@ -43,15 +44,14 @@ export default async function StoreHomePage() {
             <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm">
               <Link href={`/products/${product.slug}`} className="cursor-pointer">
                 <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                  {/* Basic Image display - unoptimized for static export */}
-                  <Image
+                  {/* Use the ProductImage client component */}
+                  <ProductImage
                     src={product.image?.split(",")[0] || "/placeholder-image.jpg"}
                     alt={product.name}
                     width={300} // Provide explicit width
                     height={300} // Provide explicit height
                     className="h-full w-full object-cover object-center group-hover:opacity-75"
                     unoptimized // Ensure image is not optimized
-                    onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-image.jpg"; }}
                   />
                 </div>
               </Link>
