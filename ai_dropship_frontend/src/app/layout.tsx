@@ -4,7 +4,8 @@ import './globals.css';
 import { Providers } from './Providers'; // Import the client component for context
 import Navbar from '@/components/Navbar'; // Import the Navbar component
 import Footer from '@/components/Footer'; // Import the Footer component
-import ErrorBoundary from '@/components/ErrorBoundary'; // Import the ErrorBoundary component
+// Import the ClientErrorBoundaryWrapper instead of ErrorBoundary directly
+import ClientErrorBoundaryWrapper from '@/components/ClientErrorBoundaryWrapper'; 
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,10 +36,10 @@ export default function RootLayout({
           {/* Navbar and Footer are outside the main error boundary, assuming they are less likely to fail */}
           <Navbar /> 
           <main className="flex-grow container mx-auto px-4 py-8">
-            {/* Wrap the main page content with the Error Boundary */}
-            <ErrorBoundary>
+            {/* Wrap the main page content with the ClientErrorBoundaryWrapper */}
+            <ClientErrorBoundaryWrapper>
               {children}
-            </ErrorBoundary>
+            </ClientErrorBoundaryWrapper>
           </main>
           <Footer /> 
         </Providers>
