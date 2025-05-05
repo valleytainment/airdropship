@@ -2,42 +2,60 @@
 
 import { ProductPublic } from "@/types";
 import { mockProducts } from "@/data/products"; // Import mock products
-// Remove direct import of next/image
 import Link from "next/link"; // Import Link for basic navigation
 import { formatPrice } from "@/lib/utils"; // Import formatPrice
 import ProductImage from "@/components/ProductImage"; // Import the new client component
+import ClientOnly from "@/components/ClientOnly"; // Import ClientOnly
+import EnvChecker from "@/components/EnvChecker"; // Import EnvChecker
 
 // Fetch data server-side (using mock data directly for static export)
+// Added try...catch for robustness, even with mock data
 async function getProducts(): Promise<ProductPublic[]> {
-  console.log("Using mock products for minimal static homepage generation.");
-  const mappedMockProducts = mockProducts.map(p => ({
-    ...p,
-    id: p.id,
-    internal_id: parseInt(p.id, 10),
-    slug: p.slug || p.id,
-    category: "Mock Category",
-    supplier_internal_id: 0,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    name: p.name,
-    description: p.description,
-    price: p.price,
-    image: p.image,
-  })) as ProductPublic[];
-  return mappedMockProducts;
+  try {
+    console.log("Using mock products for minimal static homepage generation.");
+    // Simulate potential data transformation or fetching logic that might fail
+    const mappedMockProducts = mockProducts.map(p => ({
+      ...p,
+      id: p.id,
+      internal_id: parseInt(p.id, 10),
+      slug: p.slug || p.id,
+      category: "Mock Category",
+      supplier_internal_id: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      image: p.image,
+    })) as ProductPublic[];
+    
+    // Simulate a potential error during processing
+    // if (Math.random() > 0.8) { // Uncomment to test error handling
+    //   throw new Error("Simulated data processing error");
+    // }
+    
+    return mappedMockProducts;
+  } catch (error) {
+    console.error("Failed to get products:", error);
+    return []; // Return empty array on error
+  }
 }
 
 export default async function StoreHomePage() {
   const products = await getProducts();
 
-  // Corrected return statement without extra parentheses
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Include EnvChecker for client-side validation */}
+      <ClientOnly>
+        <EnvChecker />
+      </ClientOnly>
+      
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">Featured Products</h1>
       
       {/* Render products directly as basic HTML/Next components */}
       {products.length === 0 ? (
-        <div className="text-center text-gray-500 dark:text-gray-400 py-10">No products to display.</div>
+        <div className="text-center text-gray-500 dark:text-gray-400 py-10">No products available at this time.</div>
       ) : (
         <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
           {products.map((product) => (
@@ -57,7 +75,6 @@ export default async function StoreHomePage() {
               </Link>
               <div className="flex flex-1 flex-col space-y-2 p-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {/* Corrected Link syntax */}
                   <Link href={`/products/${product.slug}`}>
                     <span aria-hidden="true" className="absolute inset-0" />
                     {product.name}
