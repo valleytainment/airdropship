@@ -1,23 +1,18 @@
 "use client"; // Required for useState, useEffect
 
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState } from "react";
 import Link from "next/link";
 import { ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/lib/stores/cart";
+import { useCartStore, useCartHydrated } from "@/lib/stores/cart"; // Import useCartHydrated
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { totalItems } = useCartStore();
-  
-  // State to track client-side mounting
-  const [hasMounted, setHasMounted] = useState(false);
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  const hasHydrated = useCartHydrated(); // Use the hydration hook
 
   // Get item count only after mounting to avoid hydration mismatch
-  const itemCount = hasMounted ? totalItems() : 0;
+  const itemCount = hasHydrated ? totalItems() : 0;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -49,7 +44,7 @@ export default function Navbar() {
                 <Button variant="ghost" size="icon" className="relative text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                   <ShoppingCart className="h-6 w-6" />
                   {/* Render badge only after mounting and if items exist */}
-                  {hasMounted && itemCount > 0 && (
+                  {hasHydrated && itemCount > 0 && (
                     <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
                       {itemCount}
                     </span>
@@ -89,7 +84,7 @@ export default function Navbar() {
             </Link>
             <Link href="/cart" className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium" onClick={toggleMobileMenu}>
               {/* Display cart count in mobile menu only after mount */}
-              Shopping Cart {hasMounted && itemCount > 0 ? `(${itemCount})` : ""}
+              Shopping Cart {hasHydrated && itemCount > 0 ? `(${itemCount})` : ""}
             </Link>
             <Link href="/account" className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium" onClick={toggleMobileMenu}>
               Account

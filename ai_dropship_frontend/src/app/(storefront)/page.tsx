@@ -64,7 +64,7 @@ export default async function StoreHomePage() {
                 <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
                   {/* Use the ProductImage client component */}
                   <ProductImage
-                    src={product.image?.split(",")[0] || "/placeholder-image.jpg"}
+                    src={product.image?.split(",")[0] || "/placeholder-product.jpg"}
                     alt={product.name}
                     width={300} // Provide explicit width
                     height={300} // Provide explicit height

@@ -4,7 +4,7 @@ import './globals.css';
 import { Providers } from './Providers'; // Import the client component for context
 import Navbar from '@/components/Navbar'; // Import the Navbar component
 import Footer from '@/components/Footer'; // Import the Footer component
-// Import the ClientErrorBoundaryWrapper instead of ErrorBoundary directly
+// Import the ClientErrorBoundaryWrapper instead of ErrorBoundary directly - TEMP REMOVED
 import ClientErrorBoundaryWrapper from '@/components/ClientErrorBoundaryWrapper'; 
 
 const geistSans = Geist({
