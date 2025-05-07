@@ -1,19 +1,8 @@
-# netlify.toml at repo root
-
+# netlify.toml
 [build]
-  # Explicitly set base directory to repository root
-  base = "."
-  # Command to build the specific frontend package from the root
-  # 1. Install dependencies for the workspace
-  # 2. Build the specific frontend package using pnpm filter
-  # 3. List the contents of the frontend directory to check for the "out" folder
-  command = "pnpm install --force && pnpm --filter next-cloudflare-template run build && echo \"Listing contents of ai_dropship_frontend after build: \" && ls -la ai_dropship_frontend"
-  # Publish the output directory of the frontend package, relative to the root
+  command = "cd ai_dropship_frontend && pnpm install --force && pnpm build"
   publish = "ai_dropship_frontend/out"
 
 [build.environment]
-  # Specify the pnpm version Netlify should use
   PNPM_VERSION = "8.15.9"
-  # Set NODE_VERSION if needed, Netlify often defaults to a reasonable LTS
-  # NODE_VERSION = "22"
 

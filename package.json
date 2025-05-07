@@ -1,17 +1,9 @@
 {
-	"name": "airdropship-monorepo",
-	"version": "1.0.0",
-	"private": true,
-	"workspaces": ["ai_dropship_frontend", "worker"],
-	"scripts": {
-	  "prepare": "husky install",
-	  "dev": "pnpm --parallel dev",
-	  "build": "pnpm --parallel build",
-	  "lint": "pnpm --parallel lint"
-	},
-	"devDependencies": {
-	  "husky": "^8.0.0",
-	  "pnpm": "8.x"
-	}
+  "name": "root",
+  "private": true,
+  "resolutions": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   }
-  
+}
+
