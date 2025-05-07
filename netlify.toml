@@ -1,8 +1,14 @@
 # netlify.toml
 [build]
-  command = "cd ai_dropship_frontend && pnpm install --force && pnpm build"
-  publish = "ai_dropship_frontend/out"
+  base    = "ai_dropship_frontend"      # Point Netlify to the frontend workspace
+  command = "pnpm install --force && pnpm run build"  
+  publish = "out"                        # Next.js static export output (relative to base)
 
 [build.environment]
-  PNPM_VERSION = "8.15.9"
+  PNPM_VERSION = "8.15.9" # Or your specific pnpm version
+  NPM_FLAGS = "--prefix=/" # Prevents Netlify's default npm install interference
+
+# Optional: Add Next.js plugin for full SSR/ISR support if not doing static export
+# [[plugins]]
+#   package = "@netlify/plugin-nextjs"
 
