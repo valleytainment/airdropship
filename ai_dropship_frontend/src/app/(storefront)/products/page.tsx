@@ -62,7 +62,7 @@ function ProductList() {
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString()); // Corrected line
     params.set("q", searchTerm);
     params.set("page", "1"); // Reset to page 1 on new search
     window.history.pushState(null, "", `?${params.toString()}`);
@@ -71,7 +71,7 @@ function ProductList() {
   };
 
   const handleSortChange = (value: string) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString()); // Corrected line
     params.set("sort", value);
     params.set("page", "1"); // Reset to page 1 on sort change
     window.history.pushState(null, "", `?${params.toString()}`);
