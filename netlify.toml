@@ -6,7 +6,8 @@
   # Command to build the specific frontend package from the root
   # 1. Install dependencies for the workspace
   # 2. Build the specific frontend package using pnpm filter
-  command = "pnpm install --force && pnpm --filter next-cloudflare-template run build"
+  # 3. List the contents of the frontend directory to check for the "out" folder
+  command = "pnpm install --force && pnpm --filter next-cloudflare-template run build && echo \"Listing contents of ai_dropship_frontend after build: \" && ls -la ai_dropship_frontend"
   # Publish the output directory of the frontend package, relative to the root
   publish = "ai_dropship_frontend/out"
 
