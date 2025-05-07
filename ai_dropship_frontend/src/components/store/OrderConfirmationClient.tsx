@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
-import { OrderPublic } from "@/types"; // Assuming types are defined
+import { Order } from "@/types"; // Assuming types are defined
 
 interface OrderConfirmationClientProps {
   orderId: string; // Use orderId to match the parent Server Component
 }
 
 // Helper function to fetch order data (remains client-side for this component)
-async function getOrderData(orderId: string): Promise<OrderPublic | null> {
+async function getOrderData(orderId: string): Promise<Order | null> {
   try {
     // Use orderId in the API call
     const response = await apiClient.get(`/orders/storefront/${orderId}`);
@@ -26,7 +26,7 @@ async function getOrderData(orderId: string): Promise<OrderPublic | null> {
 }
 
 export default function OrderConfirmationClient({ orderId }: OrderConfirmationClientProps) {
-  const [order, setOrder] = useState<OrderPublic | null>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

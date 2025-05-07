@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Product } from "@/types"
+import { ProductPublic as Product } from "@/types"
 import AddToCartButton from "@/components/store/AddToCartButton"
 import { Input } from "@/components/ui/input"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
@@ -18,23 +18,36 @@ export default function ClientProductPage({ product }: { product: Product }) {
     }
   }
 
+  // Extract the first image URL or use placeholder
+  const imageUrl = product.image?.split(",")[0] || "/placeholder-product.jpg";
+
   return (
     <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
       {/* Image Gallery */}
       <div>
         <AspectRatio ratio={1} className="overflow-hidden rounded-lg border bg-muted">
-          {product.image_url ? (
+          {imageUrl !== "/placeholder-product.jpg" ? (
             <Image
-              src={product.image_url}
-              alt={product.title}
+              src={imageUrl} // Use the extracted URL
+              alt={product.title || product.name || "Product Image"} // Use title or name as alt text
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
+              unoptimized // Added unoptimized based on other image usage
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="text-muted-foreground">No Image Available</span>
+              {/* Display placeholder image if imageUrl is the placeholder */}
+               <Image
+                src={imageUrl} // Use the placeholder URL
+                alt="Placeholder Image"
+                fill
+                className="object-contain p-4" // Use contain to show placeholder properly
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+                unoptimized
+              />
             </div>
           )}
         </AspectRatio>
@@ -42,8 +55,8 @@ export default function ClientProductPage({ product }: { product: Product }) {
 
       {/* Product Info & Actions */}
       <div className="flex flex-col space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">{product.title}</h1>
-        <div className="text-2xl font-semibold">${(product.price / 100).toFixed(2)}</div>
+        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">{product.title || product.name}</h1>
+        <div className="text-2xl font-semibold">${((product.price || product.current_retail_price || 0) / 100).toFixed(2)}</div>
 
         {/* Quantity & Add to Cart */}
         <div className="flex items-center gap-4">
@@ -72,7 +85,7 @@ export default function ClientProductPage({ product }: { product: Product }) {
           <TabsContent value="details" className="pt-4">
             <p className="text-sm text-muted-foreground">
               Category: {product.category || "N/A"}<br />
-              Tags: {product.tags?.join(", ") || "N/A"}
+              Tags: {product.tags || "N/A"} {/* Assuming tags is a string now */}
             </p>
           </TabsContent>
         </Tabs>
@@ -80,3 +93,4 @@ export default function ClientProductPage({ product }: { product: Product }) {
     </div>
 )
 }
+

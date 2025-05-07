@@ -4,7 +4,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductGrid from "@/components/store/ProductGrid";
-import { Product } from "@/types";
+import { ProductPublic as Product } from "@/types";
 import apiClient from "@/lib/apiClient";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

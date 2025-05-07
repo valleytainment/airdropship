@@ -1,6 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { ProductPublic } from '@/types';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { ProductPublic } from "@/types";
+import { useState, useEffect } from "react"; // Import useState and useEffect
 
 // Define CartItem interface
 export interface CartItem extends ProductPublic {
@@ -17,6 +18,27 @@ interface CartState {
   totalItems: () => number;
   totalPrice: () => number;
 }
+
+// Helper function to safely access localStorage only on the client side
+// This ensures that localStorage is only accessed when window is defined (client-side)
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(key);
+    }
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(key, value);
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(key);
+    }
+  },
+};
 
 // Create the Zustand store with persist middleware
 export const useCartStore = create<CartState>()(
@@ -62,15 +84,25 @@ export const useCartStore = create<CartState>()(
       totalPrice: () => get().items.reduce((total, item) => total + (item.price || 0) * item.quantity, 0),
     }),
     {
-      name: 'cart-storage', // Name of the item in storage
-      // Explicitly use localStorage
-      // Note: This assumes localStorage is available. Hydration errors might still occur
-      // if this store is accessed server-side before client mount.
-      // Using ClientOnly component around components that use this store is recommended.
-      getStorage: () => typeof window !== 'undefined' ? localStorage : undefined,
-      // Only persist the 'items' part of the state
+      name: "cart-storage", // Name of the item in storage
+      // Use createJSONStorage with the safeLocalStorage wrapper
+      storage: createJSONStorage(() => safeLocalStorage),
+      // Only persist the "items" part of the state
       partialize: (state) => ({ items: state.items }),
     }
   )
 );
+
+// Hook to ensure cart state is only accessed after client-side hydration
+export const useCartHydrated = () => {
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    // Set hydrated to true once the component mounts
+    setHydrated(true);
+  }, []);
+
+  // Return the hydration status
+  return hydrated;
+};
 

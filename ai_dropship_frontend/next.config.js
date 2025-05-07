@@ -21,13 +21,10 @@ const nextConfig = {
     ignoreBuildErrors: process.env.CI === "true",
   },
 
-  // Add experimental turbo cache config as per error log analysis
-  experimental: {
-    turbo: {
-      cache: true,
-    },
-  },
+  // Removed experimental.turbo as it was causing config validation error
+  // experimental: {
+  //   turbo: false // Disable until stable
+  // },
 };
 
 module.exports = nextConfig;
-

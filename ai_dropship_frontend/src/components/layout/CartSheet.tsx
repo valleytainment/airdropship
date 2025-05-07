@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart } from "lucide-react";
-import { useCart } from "@/lib/hooks/useCart";
+import { useCartStore } from "@/lib/stores/cart"; // Changed from useCart to useCartStore
 import CartItemComponent from "@/components/store/CartItem";
 import { formatPrice } from "@/lib/utils";
 
@@ -16,22 +16,27 @@ interface CartSheetProps {
 }
 
 const CartSheet = ({ children }: CartSheetProps) => {
-  const { cartItems, cartItemCount, cartTotal } = useCart();
+  // Updated to use properties from useCartStore
+  const { items, totalItems, totalPrice } = useCartStore((state) => ({
+    items: state.items,
+    totalItems: state.totalItems,
+    totalPrice: state.totalPrice,
+  }));
 
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
         <SheetHeader className="px-6">
-          <SheetTitle>Cart {cartItemCount > 0 && `(${cartItemCount})`}</SheetTitle>
+          <SheetTitle>Cart {totalItems() > 0 && `(${totalItems()})`}</SheetTitle>
         </SheetHeader>
         <Separator />
-        {cartItemCount > 0 ? (
+        {totalItems() > 0 ? (
           <>
             <ScrollArea className="flex-1 px-6">
               <div className="flex flex-col divide-y">
-                {cartItems.map((item) => (
-                  <CartItemComponent key={item.product_id} item={item} />
+                {items.map((item) => (
+                  <CartItemComponent key={item.id} item={item} />
                 ))}
               </div>
             </ScrollArea>
@@ -39,7 +44,7 @@ const CartSheet = ({ children }: CartSheetProps) => {
             <SheetFooter className="flex flex-col space-y-4 px-6 py-4">
               <div className="flex justify-between text-base font-medium">
                 <p>Subtotal</p>
-                <p>{formatPrice(cartTotal)}</p>
+                <p>{formatPrice(totalPrice())}</p>
               </div>
               <p className="text-sm text-muted-foreground">
                 Shipping and taxes calculated at checkout.

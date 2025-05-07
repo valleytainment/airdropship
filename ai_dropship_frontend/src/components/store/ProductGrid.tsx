@@ -1,9 +1,9 @@
 // src/components/store/ProductGrid.tsx
-import { Product } from "@/types";
+import { ProductPublic } from "@/types";
 import ProductCard from "./ProductCard";
 
 interface ProductGridProps {
-  products: Product[];
+  products: ProductPublic[];
 }
 
 const ProductGrid = ({ products }: ProductGridProps) => {

@@ -3,7 +3,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { CartItem, Product } from '@/types';
+import type { CartItem, ProductPublic as Product } from '@/types';
 
 interface CartState {
   items: CartItem[];
@@ -13,6 +13,7 @@ interface CartState {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  _recalculateTotals: (items: CartItem[]) => void; // Add this line
 }
 
 // Helper function to safely access localStorage only on the client side

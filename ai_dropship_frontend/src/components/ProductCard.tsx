@@ -21,7 +21,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm hover:shadow-lg transition-shadow duration-200 ease-in-out">
       <Link href={`/products/${product.slug}`} className="cursor-pointer">
-        <ProductImage src={product.image} alt={product.name} />
+        <ProductImage src={product.image || "/placeholder-product.jpg"} alt={product.name} width={300} height={300} />
       </Link>
       <div className="flex flex-1 flex-col space-y-2 p-4">
         <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">

@@ -5,10 +5,10 @@ import Link from "next/link";
 import { ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartSheet from "./CartSheet"; // Import CartSheet
-import { useCart } from "@/lib/hooks/useCart"; // Import cart hook
+import { useCartStore } from "@/lib/stores/cart"; // Import cart store
 
 const Header = () => {
-  const { cartItemCount } = useCart(); // Get cart item count
+  const totalItems = useCartStore((state) => state.totalItems); // Get cart item count
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,9 +39,9 @@ const Header = () => {
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {/* Optional: Add item count badge */}
-                {cartItemCount > 0 && (
+                {totalItems() > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
-                    {cartItemCount}
+                    {totalItems()}
                   </span>
                 )}
                 <span className="sr-only">Shopping Cart</span>

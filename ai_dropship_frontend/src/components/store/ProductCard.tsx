@@ -20,7 +20,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <a className="block relative w-full aspect-square">
           <Image
             src={imageUrl} 
-            alt={product.title}
+            alt={product.title || product.name}
             layout="fill"
             objectFit="cover"
             onError={(e) => {
@@ -41,10 +41,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="font-bold text-xl">${product.current_retail_price?.toFixed(2) ?? 'N/A'}</span>
           {/* Pass the necessary product details for the cart */}
           <AddToCartButton product={{
-             id: product.internal_id.toString(), // Ensure ID is string for cart hook
-             name: product.title,
+             id: product.internal_id ? product.internal_id.toString() : product.id, // Ensure ID is string for cart hook
+             name: product.title || product.name, // Ensure name is a string
              price: product.current_retail_price ?? 0,
-             imageUrl: imageUrl
+             slug: product.slug, // Add slug for ProductPublic conformity
+             image: imageUrl // Use image (from ProductPublic) instead of imageUrl
           }} />
         </div>
       </div>
