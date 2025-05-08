@@ -1,5 +1,4 @@
 # netlify.toml
-
 [build]
   # Base directory where the frontend app is located
   base = "ai_dropship_frontend"
@@ -18,11 +17,13 @@
 # These should be set by the user in the Netlify UI for their production site.
 # The values provided here are placeholders from the launch package.
 [context.production.environment]
-  NEXT_PUBLIC_API_URL = "https://api.airdropship.com" # Example: Your actual backend API URL
-  NEXT_PUBLIC_STRIPE_KEY = "pk_live_..." # Example: Your actual Stripe publishable key
+  NEXT_PUBLIC_API_URL = "https://api.airdropship.com"
+  NEXT_PUBLIC_STRIPE_KEY = "pk_live_..."
   # NEXT_PUBLIC_FACEBOOK_PIXEL_ID = "YOUR_PIXEL_ID" # Example, if using Facebook Pixel
   # NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = "G-XXXXXX" # Example, if using Google Analytics
 
-# It is recommended to set sensitive keys and actual API URLs directly in the Netlify UI 
-# under Site settings > Build & deploy > Environment, rather than committing them here.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "script-src 'self' https://va.vercel-scripts.com; object-src 'none';base-uri 'self';"
 
