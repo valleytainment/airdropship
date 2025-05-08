@@ -1,0 +1,29 @@
+# netlify.toml
+[build]
+  # Base directory where the frontend app is located
+  base = "ai_dropship_frontend"
+  # Build command to run in the base directory
+  command = "pnpm install --force && pnpm build"
+  # Publish directory (relative to the base directory)
+  publish = "out"
+
+[build.environment]
+  # Specify PNPM version to use for the build
+  PNPM_VERSION = "8.15.9"
+  # Prevent Netlify from running its default npm install, as we use pnpm
+  NPM_FLAGS = "--prefix=/"
+
+# Production context specific environment variables
+# These should be set by the user in the Netlify UI for their production site.
+# The values provided here are placeholders from the launch package.
+[context.production.environment]
+  NEXT_PUBLIC_API_URL = "https://api.airdropship.com"
+  NEXT_PUBLIC_STRIPE_KEY = "pk_live_..."
+  # NEXT_PUBLIC_FACEBOOK_PIXEL_ID = "YOUR_PIXEL_ID" # Example, if using Facebook Pixel
+  # NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = "G-XXXXXX" # Example, if using Google Analytics
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "script-src 'self' https://va.vercel-scripts.com; object-src 'none';base-uri 'self';"
+
