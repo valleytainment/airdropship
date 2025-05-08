@@ -1,1 +1,0 @@
-This file is a placeholder. The Tracking.tsx component was not found at the expected path src/components/Tracking.tsx during the Facebook Pixel removal process. If Facebook Pixel was integrated elsewhere, that code needs to be manually reviewed and removed.
