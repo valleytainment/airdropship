@@ -7,7 +7,7 @@ import json
 
 # Adjust import path based on actual project structure
 from src import schemas, models # Use models directly
-from src.models import get_db # Import get_db from models
+from src.models import get_db # Import get_db from .models
 
 # Placeholder for service functions (e.g., AI generation)
 # from src.services import ai_service, shopify_service

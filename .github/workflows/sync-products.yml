@@ -1,5 +1,6 @@
 # .github/workflows/sync-products.yml
 # Implements scheduled product synchronization using GitHub Actions for CJdropshipping.
+# Includes improvements like dependency caching and clearer steps.
 
 name: Product Sync
 
@@ -15,24 +16,44 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./ai_dropship_backend # Assuming scripts are in the backend directory
+        # Set the working directory for all run steps in this job
+        working-directory: ./ai_dropship_backend 
         
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Updated to v4
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4 # Updated to v4
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11" # Match the backend runtime
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip # The path to cache
+          # Create a new cache if requirements.txt changes
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Ensure requirements.txt is in ai_dropship_backend directory
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          # cj_client.py uses requests, ensure it's installed if not in requirements.txt
-          pip install requests 
+          echo "Installing dependencies from requirements.txt..."
+          if [ -f requirements.txt ]; then 
+            pip install -r requirements.txt
+          else
+            echo "requirements.txt not found in ai_dropship_backend. Skipping."
+          fi
+          # cj_client.py uses requests. Ensure it's installed.
+          # This check can be removed if requests is consistently in requirements.txt
+          if ! python -m pip show requests &> /dev/null; then
+            echo "requests package not found, installing..."
+            pip install requests
+          else
+            echo "requests package already installed."
+          fi
 
       - name: Run product import script
         env:
@@ -41,7 +62,11 @@ jobs:
           CJ_API_KEY: ${{ secrets.CJ_API_KEY }} 
           ENV: "production" # Ensure the script runs in production mode for actual API calls
           # Add other necessary environment variables for the script, e.g., DATABASE_URL if saving to DB
-        run: python scripts/import_products.py
+          # Example: DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "Running product import script..."
+          python scripts/import_products.py
+          echo "Product import script finished."
 
       # Optional: Add a step to commit and push changes if the script modifies files in the repo
       # (e.g., if products_data.json is committed to the repo, though usually it goes to a DB)
@@ -49,7 +74,10 @@ jobs:
       #   run: |
       #     git config --global user.name "GitHub Actions Bot"
       #     git config --global user.email "actions@github.com"
-      #     git add products_data.json # Or other files modified by the script
+      #     # Add specific files that might be modified by your script
+      #     # For example: git add path/to/your/product_data.json
+      #     # git add another/file/to/commit.txt 
+      #     
       #     # Check if there are changes to commit
       #     if ! git diff --staged --quiet; then
       #       git commit -m "Automated product data sync (CJdropshipping)"
@@ -57,4 +85,12 @@ jobs:
       #     else
       #       echo "No changes to commit."
       #     fi
+
+      - name: Sync completed
+        if: success()
+        run: echo "Product synchronization completed successfully."
+      
+      - name: Sync failed
+        if: failure()
+        run: echo "Product synchronization failed. Check logs for details."
 
