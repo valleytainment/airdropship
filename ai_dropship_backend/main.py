@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Query, APIRouter
-from .cj_client import search_products # Use relative import for cj_client
+from cj_client import search_products # Use direct import for cj_client
 
 app = FastAPI(
     title="Airdropship API",
