@@ -5,6 +5,7 @@ import { Providers } from "./Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ClientErrorBoundaryWrapper from "@/components/ClientErrorBoundaryWrapper";
+import { Analytics } from "@vercel/analytics/react"; // Import Vercel Analytics
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
             <ClientErrorBoundaryWrapper>{children}</ClientErrorBoundaryWrapper>
           </main>
           <Footer />
+          <Analytics /> {/* Add Vercel Analytics component here */}
         </Providers>
       </body>
     </html>
