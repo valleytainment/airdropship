@@ -7,6 +7,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.get("/healthz", tags=["Health Check"])
+async def health_check():
+    return {"status": "ok"}
+
 # Products router
 products_router = APIRouter()
 
