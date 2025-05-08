@@ -1,14 +1,28 @@
 # netlify.toml
+
 [build]
-  base    = "ai_dropship_frontend"      # Point Netlify to the frontend workspace
-  command = "pnpm install --force && pnpm run build"  
-  publish = "out"                        # Next.js static export output (relative to base)
+  # Base directory where the frontend app is located
+  base = "ai_dropship_frontend"
+  # Build command to run in the base directory
+  command = "pnpm install --force && pnpm build"
+  # Publish directory (relative to the base directory)
+  publish = "out"
 
 [build.environment]
-  PNPM_VERSION = "8.15.9" # Or your specific pnpm version
-  NPM_FLAGS = "--prefix=/" # Prevents Netlify's default npm install interference
+  # Specify PNPM version to use for the build
+  PNPM_VERSION = "8.15.9"
+  # Prevent Netlify from running its default npm install, as we use pnpm
+  NPM_FLAGS = "--prefix=/"
 
-# Optional: Add Next.js plugin for full SSR/ISR support if not doing static export
-# [[plugins]]
-#   package = "@netlify/plugin-nextjs"
+# Production context specific environment variables
+# These should be set by the user in the Netlify UI for their production site.
+# The values provided here are placeholders from the launch package.
+[context.production.environment]
+  NEXT_PUBLIC_API_URL = "https://api.airdropship.com" # Example: Your actual backend API URL
+  NEXT_PUBLIC_STRIPE_KEY = "pk_live_..." # Example: Your actual Stripe publishable key
+  # NEXT_PUBLIC_FACEBOOK_PIXEL_ID = "YOUR_PIXEL_ID" # Example, if using Facebook Pixel
+  # NEXT_PUBLIC_GOOGLE_ANALYTICS_ID = "G-XXXXXX" # Example, if using Google Analytics
+
+# It is recommended to set sensitive keys and actual API URLs directly in the Netlify UI 
+# under Site settings > Build & deploy > Environment, rather than committing them here.
 

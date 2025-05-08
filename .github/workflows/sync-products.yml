@@ -1,0 +1,60 @@
+# .github/workflows/sync-products.yml
+# Implements scheduled product synchronization using GitHub Actions.
+
+name: Product Sync
+
+on:
+  workflow_dispatch: # Allows manual triggering from the GitHub Actions UI
+  schedule:
+    # Runs daily at 3 AM UTC. Adjust cron schedule as needed.
+    # Example: "0 3 * * *" for daily at 3 AM UTC
+    # Example: "*/30 * * * *" for every 30 minutes (for testing, then revert)
+    - cron: "0 3 * * *"
+
+jobs:
+  sync_products:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./ai_dropship_backend # Assuming scripts are in the backend directory
+        
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.11" # Match the backend runtime
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install requests # Ensure requests is installed for the script
+
+      - name: Run product import script
+        env:
+          # These secrets need to be configured in your GitHub repository settings
+          # Go to Settings > Secrets and variables > Actions > New repository secret
+          SPOCKET_API_KEY: ${{ secrets.SPOCKET_API_KEY }} 
+          ENV: "production" # Ensure the script runs in production mode for actual API calls
+          # Add other necessary environment variables for the script, e.g., DATABASE_URL if saving to DB
+        run: python scripts/import_products.py
+
+      # Optional: Add a step to commit and push changes if the script modifies files in the repo
+      # (e.g., if products_data.json is committed to the repo, though usually it goes to a DB)
+      # - name: Commit and push if data changed
+      #   run: |
+      #     git config --global user.name "GitHub Actions Bot"
+      #     git config --global user.email "actions@github.com"
+      #     git add products_data.json # Or other files modified by the script
+      #     # Check if there are changes to commit
+      #     if ! git diff --staged --quiet; then
+      #       git commit -m "Automated product data sync"
+      #       git push
+      #     else
+      #       echo "No changes to commit."
+      #     fi
+
