@@ -10,4 +10,5 @@ pymysql # For MySQL connection as suggested in models.py template
 
 # Add other specific dependencies if used, e.g.:
 # psycopg2-binary # If using PostgreSQL instead of MySQL
+requests>=2.31.0
 
