@@ -5,7 +5,6 @@ import { Providers } from "./Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ClientErrorBoundaryWrapper from "@/components/ClientErrorBoundaryWrapper";
-import EndoInitLoader from "@/components/EndoInitLoader"; // Import the new loader
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,7 +27,6 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900`}
       >
         <Providers>
-          <EndoInitLoader /> {/* Add the loader here, high in the component tree */}
           <Navbar />
           <main className="flex-grow container mx-auto px-4 py-8">
             <ClientErrorBoundaryWrapper>{children}</ClientErrorBoundaryWrapper>

@@ -1,34 +1,20 @@
 # ai_dropship_backend/scripts/import_products.py
-# Implements product synchronization logic as per the launch package.
+# Implements product synchronization logic, now using CJdropshipping.
 
 import os
-import requests
+import sys
 import json
 
+# Adjust sys.path to allow importing from the parent directory (ai_dropship_backend)
+# This is necessary if cj_client.py is in the parent directory and this script is run directly.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+sys.path.append(PARENT_DIR)
+
+from cj_client import search_products # Assuming cj_client.py is in PARENT_DIR
+
 # Environment variable to distinguish between production and development
-# This should be set in your deployment environment (e.g., Render)
 ENVIRONMENT = os.getenv("ENV", "development") # Defaults to development
-SPOCKET_API_KEY = os.getenv("SPOCKET_API_KEY")
-
-def get_products_from_spocket():
-    """Fetches products from the Spocket API."""
-    if not SPOCKET_API_KEY:
-        print("Error: SPOCKET_API_KEY environment variable is not set.")
-        return [] # Return empty list or raise an error
-
-    api_url = "https://api.spocket.co/v1/products" # Example URL, replace with actual if different
-    headers = {
-        "Authorization": f"Bearer {SPOCKET_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    try:
-        response = requests.get(api_url, headers=headers)
-        response.raise_for_status() # Raises an HTTPError for bad responses (4XX or 5XX)
-        return response.json().get("data", []) # Assuming products are in a "data" key
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching products from Spocket: {e}")
-        return []
 
 def get_mock_products():
     """Returns mock product data for development and testing."""
@@ -40,7 +26,8 @@ def get_mock_products():
             "description": "High-fidelity sound, long battery life, and comfortable fit.",
             "category": "Electronics",
             "imageUrl": "https://via.placeholder.com/300x300.png?text=Earbuds+Pro",
-            "stock": 150
+            "stock": 150,
+            "supplier": "MockSupplier"
         },
         {
             "id": "mock_2", 
@@ -49,7 +36,8 @@ def get_mock_products():
             "description": "Adjustable brightness, eye-caring light, and convenient USB port.",
             "category": "Home Office",
             "imageUrl": "https://via.placeholder.com/300x300.png?text=LED+Desk+Lamp",
-            "stock": 85
+            "stock": 85,
+            "supplier": "MockSupplier"
         },
         {
             "id": "mock_3", 
@@ -58,45 +46,59 @@ def get_mock_products():
             "description": "Monitors heart rate, sleep, steps, and multiple sport modes.",
             "category": "Wearables",
             "imageUrl": "https://via.placeholder.com/300x300.png?text=Fitness+Tracker",
-            "stock": 120
+            "stock": 120,
+            "supplier": "MockSupplier"
         }
     ]
 
 def sync_and_save_products():
-    """Determines environment, fetches products, and saves them (e.g., to a file or database)."""
+    """Determines environment, fetches products from CJdropshipping or mock data, and saves them."""
     products = []
     if ENVIRONMENT == "production":
-        print("Production environment: Fetching products from Spocket API...")
-        products = get_products_from_spocket()
+        print("Production environment: Fetching products from CJdropshipping API...")
+        try:
+            # For a general sync, you might search for popular categories or new items.
+            # Here, we use a generic query "electronics" as an example.
+            # You might want to loop through multiple queries or categories for a full sync.
+            cj_products = search_products(query="electronics", page=1, limit=50) # Fetch up to 50 products
+            if cj_products:
+                print(f"Successfully fetched {len(cj_products)} products from CJdropshipping.")
+                # TODO: Map CJ product fields to your desired database schema/JSON structure.
+                # For now, we save the raw CJ product data.
+                products = cj_products 
+            else:
+                print("No products returned from CJdropshipping for the query.")
+        except Exception as e:
+            print(f"Error fetching products from CJdropshipping: {e}")
+            print("Falling back to mock data for this run due to API error.")
+            products = get_mock_products()
     else:
         print("Development/Testing environment: Using mock product data...")
         products = get_mock_products()
 
     if products:
-        print(f"Successfully fetched/generated {len(products)} products.")
-        # In a real application, you would save these products to your database.
-        # For this example, we will print them or save to a JSON file.
-        output_file = "products_data.json"
+        # Add a supplier field for clarity if it doesn't exist
+        for product in products:
+            if "supplier" not in product:
+                product["supplier"] = "CJdropshipping" if ENVIRONMENT == "production" and product in cj_products else product.get("supplier", "Unknown")
+
+        print(f"Successfully prepared {len(products)} products.")
+        output_file = os.path.join(SCRIPT_DIR, "products_data.json") # Save in the same directory as the script
         try:
             with open(output_file, "w") as f:
                 json.dump(products, f, indent=2)
             print(f"Product data saved to {output_file}")
         except IOError as e:
             print(f"Error saving product data to file: {e}")
-        
-        # Example: Print product names
-        # for product in products:
-        #     print(f"- {product.get(\'name\')}")
     else:
         print("No products were fetched or generated.")
 
 if __name__ == "__main__":
-    print("Starting product synchronization script...")
-    sync_and_save_products()
+    print("Starting product synchronization script (CJdropshipping integration)...")
+    # Ensure CJ_API_KEY is set if in production
+    if ENVIRONMENT == "production" and not os.getenv("CJ_API_KEY"):
+        print("Error: CJ_API_KEY environment variable is not set for production. Aborting sync.")
+    else:
+        sync_and_save_products()
     print("Product synchronization script finished.")
-
-# To run this script:
-# 1. Ensure `requests` library is installed: pip install requests
-# 2. Set environment variables if needed (SPOCKET_API_KEY, ENV).
-# 3. Execute: python ai_dropship_backend/scripts/import_products.py
 
