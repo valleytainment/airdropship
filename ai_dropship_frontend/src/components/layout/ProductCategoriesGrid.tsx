@@ -29,8 +29,8 @@ const ProductCategoriesGrid: React.FC<ProductCategoriesGridProps> = ({ title, ca
                   <Image 
                     src={category.imageUrl || '/placeholder-category.jpg'} 
                     alt={category.name} 
-                    width={300} // Added width for Next.js Image
-                    height={300} // Added height for Next.js Image
+                    width={400} // Updated width as per audit suggestion
+                    height={300} // Updated height as per audit suggestion
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300 ease-in-out"
                   />
                   <div className="p-4 bg-gray-50">
