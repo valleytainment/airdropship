@@ -3,9 +3,9 @@
   # Base directory where the frontend app is located
   base = "ai_dropship_frontend"
   # Build command to run in the base directory
-  command = "pnpm install --force && pnpm build"
+  command = "pnpm install --frozen-lockfile && pnpm build"
   # Publish directory (relative to the base directory)
-  publish = "out"
+  publish = "ai_dropship_frontend/out"
 
 [build.environment]
   # Specify PNPM version to use for the build
@@ -25,5 +25,13 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "script-src 'self' https://va.vercel-scripts.com; object-src 'none';base-uri 'self';"
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' https://va.vercel-scripts.com;
+      img-src 'self' data:;
+      style-src 'self' 'unsafe-inline';
+      font-src 'self';
+      object-src 'none';
+      base-uri 'self';
+    """
 
