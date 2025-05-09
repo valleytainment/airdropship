@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CartSheet from "./CartSheet"; // Import CartSheet
+import { CartSheet } from "./CartSheet"; // Import CartSheet
 import { useCartStore } from "@/lib/stores/cart"; // Import cart store
 
 const Header = () => {
@@ -35,17 +35,21 @@ const Header = () => {
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="flex items-center">
             {/* Cart Button/Sheet Trigger */}
-            <CartSheet>
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {/* Optional: Add item count badge */}
-                {totalItems() > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
-                    {totalItems()}
-                  </span>
-                )}
-                <span className="sr-only">Shopping Cart</span>
-              </Button>
+            <CartSheet
+              trigger={
+                <Button variant="ghost" size="icon" className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  {/* Optional: Add item count badge */}
+                  {totalItems() > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
+                      {totalItems()}
+                    </span>
+                  )}
+                  <span className="sr-only">Shopping Cart</span>
+                </Button>
+              }
+            >
+              <>{/* Placeholder for cart content */}</>
             </CartSheet>
 
             {/* User Account Button */}
