@@ -1,8 +1,8 @@
 import React from 'react';
-import NavigationBar from './NavigationBar';
-import Footer from './Footer';
+import NavigationBar from "@/components/layout/NavigationBar";
+import Footer from "@/components/layout/Footer";
 
-const Layout = ({ children }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <NavigationBar />
