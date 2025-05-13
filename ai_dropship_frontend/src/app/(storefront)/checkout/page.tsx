@@ -1,51 +1,80 @@
-"use client"; // Ensure this is a client component as it uses hooks
+"use client";
 
-// import { useCart } from "@/context/CartContext"; // Remove old context import
-import { useCartStore } from "@/lib/stores/cart"; // Import the new zustand store
+import { useCartStore } from "@/lib/stores/cart";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useRouter } from 'next/navigation'; // Import useRouter for redirection
+import { useRouter } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Ensure this is your actual Stripe Publishable Key, or use an environment variable
+// For now, using the placeholder as discussed.
+const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "<your_stripe_publishable_key_here>";
+const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 export default function CheckoutPage() {
-  // Use the zustand store
   const { items: cartItems, totalPrice, clearCart } = useCartStore();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
-    email: "",
-    address: "",
-    cardNumber: "",
-    expiry: "",
-    cvc: "",
-  });
-
-  // Get total amount from the zustand store's selector function
   const totalAmount = totalPrice();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const handleCheckout = async () => {
+    setIsLoading(true);
+    setError(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement actual checkout logic (e.g., API call to process payment)
-    console.log("Submitting checkout form:", formData);
-    console.log("Cart items:", cartItems);
-    
-    // Simulate successful checkout
-    const mockOrderId = `mock-${Date.now()}`;
-    console.log(`Mock checkout successful. Order ID: ${mockOrderId}`);
+    if (cartItems.length === 0) {
+      setError("Your cart is empty.");
+      setIsLoading(false);
+      return;
+    }
 
-    // Clear the cart after successful checkout
-    clearCart();
+    if (STRIPE_PUBLISHABLE_KEY === "<your_stripe_publishable_key_here>") {
+        console.warn("Stripe Publishable Key is a placeholder. Real payments will not work.");
+        // Optionally, you could prevent checkout or show a more prominent warning to the user.
+    }
 
-    // Redirect to order confirmation page
-    router.push(`/order-confirmation/${mockOrderId}`);
-    
-    // alert("Checkout submitted (mock)! See console for details."); // Remove alert
+    // Prepare line items for Stripe (ensure price is in cents)
+    const lineItems = cartItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: Math.round(item.price * 100), // Convert to cents and ensure integer
+      quantity: item.quantity,
+    }));
+
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/stripe/create-checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(lineItems),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to create checkout session.");
+      }
+
+      const session = await response.json();
+      const stripe = await stripePromise;
+
+      if (stripe && session.sessionId) {
+        const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: session.sessionId });
+        if (stripeError) {
+          console.error("Stripe redirection error:", stripeError);
+          setError(stripeError.message || "Failed to redirect to Stripe.");
+        }
+      } else {
+        throw new Error("Stripe.js failed to load or session ID missing.");
+      }
+    } catch (err: any) {
+      console.error("Checkout error:", err);
+      setError(err.message || "An unexpected error occurred during checkout.");
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -53,7 +82,6 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold mb-6">Checkout</h1>
       
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Order Summary */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
           <div className="cart-items space-y-4 border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
@@ -78,75 +106,24 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Checkout Form */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Shipping & Payment</h2>
-          <form className="checkout-form space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                type="email" 
-                id="email" 
-                name="email" 
-                value={formData.email} 
-                onChange={handleInputChange} 
-                required 
-              />
-            </div>
-            <div>
-              <Label htmlFor="address">Shipping Address</Label>
-              <Input 
-                type="text" 
-                id="address" 
-                name="address" 
-                value={formData.address} 
-                onChange={handleInputChange} 
-                required 
-              />
-            </div>
-            <div>
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input 
-                type="text" 
-                id="cardNumber" 
-                name="cardNumber" 
-                placeholder="xxxx xxxx xxxx xxxx" 
-                value={formData.cardNumber} 
-                onChange={handleInputChange} 
-                required 
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input 
-                  type="text" 
-                  id="expiry" 
-                  name="expiry" 
-                  placeholder="MM/YY" 
-                  value={formData.expiry} 
-                  onChange={handleInputChange} 
-                  required 
-                />
-              </div>
-              <div>
-                <Label htmlFor="cvc">CVC</Label>
-                <Input 
-                  type="text" 
-                  id="cvc" 
-                  name="cvc" 
-                  placeholder="123" 
-                  value={formData.cvc} 
-                  onChange={handleInputChange} 
-                  required 
-                />
-              </div>
-            </div>
-            
-            <Button type="submit" className="w-full mt-4" disabled={cartItems.length === 0}>
-              Complete Purchase
-            </Button>
-          </form>
+          <h2 className="text-xl font-semibold mb-4">Proceed to Payment</h2>
+          {error && <p className="text-red-500 mb-4">Error: {error}</p>}
+          {STRIPE_PUBLISHABLE_KEY === "<your_stripe_publishable_key_here>" && 
+            <p className="text-orange-500 mb-4 p-2 border border-orange-500 rounded-md bg-orange-50 dark:bg-orange-900/30">
+                <strong>Note:</strong> Stripe is using a placeholder key. Real payments will not be processed. Replace with your actual Stripe Publishable Key for live functionality.
+            </p>
+          }
+          <Button 
+            onClick={handleCheckout} 
+            className="w-full mt-4" 
+            disabled={isLoading || cartItems.length === 0}
+          >
+            {isLoading ? "Processing..." : "Pay with Stripe"}
+          </Button>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            You will be redirected to Stripe to complete your payment securely.
+          </p>
         </div>
       </div>
     </div>
