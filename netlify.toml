@@ -5,7 +5,7 @@
   # Build command to run in the base directory
   command = "pnpm install --frozen-lockfile && pnpm build"
   # Publish directory (relative to the base directory)
-  publish = "ai_dropship_frontend/out"
+  publish = "out"
 
 [build.environment]
   # Specify PNPM version to use for the build
