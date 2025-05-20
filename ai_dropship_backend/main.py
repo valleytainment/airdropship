@@ -1,5 +1,11 @@
 from fastapi import FastAPI, Query, APIRouter, HTTPException, Body
-from ai_dropship_backend.cj_client import search_products
+# Change relative import to handle both local development and Render deployment
+try:
+    # Try the package import first (for when installed via setup.py)
+    from ai_dropship_backend.cj_client import search_products
+except ModuleNotFoundError:
+    # Fall back to relative import (for local development)
+    from cj_client import search_products
 import traceback
 import stripe # Import the stripe library
 import os
