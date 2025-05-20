@@ -5,13 +5,12 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"; // Reverted import to use the local ui/sheet wrapper
+} from "@/components/ui/sheet"; // Using the local ui/sheet wrapper with fixed children support
 
 interface CartSheetProps {
   trigger: ReactNode;
 }
 
-// Using PropsWithChildren as per audit, this should be fine with the correct import
 export function CartSheet({
   trigger,
   children,
@@ -19,7 +18,6 @@ export function CartSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      {/* @ts-ignore TODO: Investigate SheetContentProps typing from @/components/ui/sheet. Property 'children' error. */}
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
         <SheetHeader className="px-6">
           <SheetTitle>
@@ -31,4 +29,3 @@ export function CartSheet({
     </Sheet>
   );
 }
-

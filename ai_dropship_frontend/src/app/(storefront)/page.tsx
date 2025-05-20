@@ -13,6 +13,7 @@
 // For local development, this fetch will be made from the Node.js environment running Next.js.
 
 import Link from "next/link";
+import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import ProductImage from "@/components/ProductImage"; // Keep ProductImage import for later
 // import { useEffect, useState } from "react"; // Removed unused imports
@@ -84,12 +85,12 @@ export default async function StoreHomePage() {
             <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm">
               <Link href={`/products/${product.slug}`} className="cursor-pointer">
                 <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden bg-gray-200 xl:aspect-h-8 xl:aspect-w-7">
-                  {/* Using a simple img tag for now instead of ProductImage for diagnostics */}
-                  <img 
+                  <ProductImage 
                     src={product.image || "/placeholder-product.jpg"} 
                     alt={product.name} 
-                    style={{width: "100%", height: "100%", objectFit: "cover"}} 
-                    className="group-hover:opacity-75"
+                    width={500}
+                    height={500}
+                    className="w-full h-full object-cover group-hover:opacity-75"
                   />
                 </div>
               </Link>
@@ -112,4 +113,3 @@ export default async function StoreHomePage() {
     </div>
   );
 }
-

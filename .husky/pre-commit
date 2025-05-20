@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
+. "$(dirname -- "$0")/_/husky.sh"
 
-pnpm --filter ai_dropship_frontend run lint
+# Run frontend checks
+cd ai_dropship_frontend && pnpm format && pnpm lint:fix
+
+# Run backend checks
+cd ../ai_dropship_backend && python -m pytest
